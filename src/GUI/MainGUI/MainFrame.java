@@ -3,6 +3,8 @@ package GUI.MainGUI;
 
 import GUI.Event.IEventMenuSelected;
 import GUI.Form.*;
+import Utilities.Auth;
+import Utilities.MsgBox;
 import java.awt.Color;
 import javax.swing.JComponent;
 
@@ -27,6 +29,12 @@ public class MainFrame extends javax.swing.JFrame {
                     setForm(new QuanLyKhoaHoc_Form());
                     lblChucNang.setText("QUẢN LÝ KHOÁ HỌC");
                 } else if (index == 4) {
+                    if(!Auth.isManager()){
+                        MsgBox.alert(panelBorder1, "Bạn không có quyền sử dụng chức năng này.");
+                    } else {
+                        setForm(new QuanLyNhanVien_Form());
+                        lblChucNang.setText("QUẢN LÝ NHÂN VIÊN");
+                    }
                     setForm(new QuanLyNhanVien_Form());
                     lblChucNang.setText("QUẢN LÝ NHÂN VIÊN");
                 } else if (index == 5) {
@@ -42,8 +50,12 @@ public class MainFrame extends javax.swing.JFrame {
                     setForm(new DiemTheoKhoaHoc_Form());
                     lblChucNang.setText("ĐIỂM THEO KHOÁ HỌC");
                 } else if (index == 11) {
-                    setForm(new DoanhThu_Form());
-                    lblChucNang.setText("DOANH THU THEO CHUYÊN ĐỀ");
+                    if(!Auth.isManager()){
+                        MsgBox.alert(panelBorder1, "Bạn không có quyền sử dụng chức năng này.");
+                    } else {
+                        setForm(new DoanhThu_Form());
+                        lblChucNang.setText("DOANH THU THEO CHUYÊN ĐỀ");
+                    }
                 } else if (index == 14) {
                     setForm(new TaiKhoan_Form());
                     lblChucNang.setText("QUẢN LÝ TÀI KHOẢN");
@@ -54,8 +66,9 @@ public class MainFrame extends javax.swing.JFrame {
                     setForm(new GioiThieu_Form());
                     lblChucNang.setText("GIỚI THIỆU PHẦN MỀM");
                 } else if (index == 17) {
-                    System.out.print("EXIT");
-                    lblChucNang.setText("");
+                    dangXuat();
+                    setForm(new Welcome_Form() );
+                    lblChucNang.setText("XIN CHÀO !");
                 }
             }
         });
@@ -64,12 +77,33 @@ public class MainFrame extends javax.swing.JFrame {
     }
     
     private void setForm(JComponent com){
+        if (Auth.isLogin()) {
         mainPanel.removeAll();
         mainPanel.add(com);
         mainPanel.repaint();
         mainPanel.revalidate();
+        } else {
+            MsgBox.alert(this, "Vui lòng đăng nhập.");
+            mainPanel.removeAll();
+            mainPanel.add(com);
+            mainPanel.repaint();
+            mainPanel.revalidate();
+            dispose();
+            new LoginFrame().setVisible(true);
+        }
+        
     }
-
+    
+    private void dangXuat(){
+        Auth.clear();
+    }
+    
+    private void ketThuc(){
+        if (MsgBox.confirm(panelBorder1, "Bạn muốn kết thúc làm việc?")) {
+            System.exit(0);
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -78,9 +112,7 @@ public class MainFrame extends javax.swing.JFrame {
         menu = new GUI.Swing.Menu();
         header1 = new GUI.Swing.Header();
         lblChucNang = new javax.swing.JLabel();
-        lblFullScreen = new javax.swing.JLabel();
         lblClose = new javax.swing.JLabel();
-        lblMinimize = new javax.swing.JLabel();
         mainPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -92,24 +124,10 @@ public class MainFrame extends javax.swing.JFrame {
         lblChucNang.setForeground(new java.awt.Color(0, 102, 255));
         lblChucNang.setText("CHỨC NĂNG");
 
-        lblFullScreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/HeaderIcon/fullscreen.png"))); // NOI18N
-        lblFullScreen.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lblFullScreenMouseClicked(evt);
-            }
-        });
-
         lblClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/HeaderIcon/close.png"))); // NOI18N
         lblClose.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 lblCloseMouseClicked(evt);
-            }
-        });
-
-        lblMinimize.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/HeaderIcon/minimize.png"))); // NOI18N
-        lblMinimize.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lblMinimizeMouseClicked(evt);
             }
         });
 
@@ -120,19 +138,13 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(header1Layout.createSequentialGroup()
                 .addGap(56, 56, 56)
                 .addComponent(lblChucNang, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 316, Short.MAX_VALUE)
-                .addComponent(lblMinimize)
-                .addGap(20, 20, 20)
-                .addComponent(lblFullScreen)
-                .addGap(20, 20, 20)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 436, Short.MAX_VALUE)
                 .addComponent(lblClose)
                 .addGap(4, 4, 4))
         );
         header1Layout.setVerticalGroup(
             header1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblFullScreen, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-            .addComponent(lblClose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(lblMinimize, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(lblClose, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
             .addComponent(lblChucNang, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
@@ -173,20 +185,8 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCloseMouseClicked
-        System.exit(0);
+        ketThuc();
     }//GEN-LAST:event_lblCloseMouseClicked
-
-    private void lblFullScreenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFullScreenMouseClicked
-        if (this.getExtendedState()!= MainFrame.MAXIMIZED_BOTH) {
-            this.setExtendedState(MainFrame.MAXIMIZED_BOTH);
-        }else{
-            this.setExtendedState(MainFrame.NORMAL);
-        }
-    }//GEN-LAST:event_lblFullScreenMouseClicked
-
-    private void lblMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMinimizeMouseClicked
-        this.setExtendedState(MainFrame.ICONIFIED);
-    }//GEN-LAST:event_lblMinimizeMouseClicked
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -226,8 +226,6 @@ public class MainFrame extends javax.swing.JFrame {
     private GUI.Swing.Header header1;
     private javax.swing.JLabel lblChucNang;
     private javax.swing.JLabel lblClose;
-    private javax.swing.JLabel lblFullScreen;
-    private javax.swing.JLabel lblMinimize;
     private javax.swing.JPanel mainPanel;
     private GUI.Swing.Menu menu;
     private GUI.Swing.PanelBorder panelBorder1;

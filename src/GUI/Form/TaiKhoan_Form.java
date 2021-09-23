@@ -1,17 +1,36 @@
 
 package GUI.Form;
 
+import DAO.NhanVienDAO;
+import Utilities.Auth;
+import Utilities.MsgBox;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 
 public class TaiKhoan_Form extends javax.swing.JPanel {
+    
+    NhanVienDAO dao = new NhanVienDAO();
 
     public TaiKhoan_Form() {
         initComponents();
+        lblHoTen.setText(Auth.user.getHoTen());
+        lblManv.setText(Auth.user.getMaNV());
         ImageIcon ii = new ImageIcon(this.getClass().getResource("/GUI/Icon/MenuItemIcon/1.png"));
         Image img = ii.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
         ii = new ImageIcon(img);
         lblImage.setIcon(ii);
+    }
+    
+    private void doiMatKhau(String matKhauCu, String matKhauMoi, String xacNhan){
+        if (!matKhauCu.equals(Auth.user.getMatKhau())) {
+            MsgBox.alert(this, "Sai mật khẩu.");
+        } else if (!matKhauMoi.equals(xacNhan)) {
+            MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
+        } else {
+            Auth.user.setMatKhau(xacNhan);
+            dao.update(Auth.user);
+            MsgBox.alert(this, "Đổi mật khẩu thành công.");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -30,6 +49,7 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
         pwdMKCu = new javax.swing.JPasswordField();
         pwdMKMoi = new javax.swing.JPasswordField();
         pwdXacNhan = new javax.swing.JPasswordField();
+        btnHuy = new javax.swing.JButton();
 
         panelBorder1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -73,6 +93,11 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
         btnDoiMK.setForeground(new java.awt.Color(102, 102, 102));
         btnDoiMK.setText("Đổi mật khẩu");
         btnDoiMK.setActionCommand("");
+        btnDoiMK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDoiMKActionPerformed(evt);
+            }
+        });
 
         pwdMKCu.setFont(new java.awt.Font("Tahoma", 3, 16)); // NOI18N
         pwdMKCu.setForeground(new java.awt.Color(102, 102, 102));
@@ -89,6 +114,17 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
         pwdXacNhan.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         pwdXacNhan.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnHuy.setBackground(new java.awt.Color(255, 255, 255));
+        btnHuy.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnHuy.setForeground(new java.awt.Color(102, 102, 102));
+        btnHuy.setText("Huỷ");
+        btnHuy.setActionCommand("");
+        btnHuy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHuyActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelBorder1Layout = new javax.swing.GroupLayout(panelBorder1);
         panelBorder1.setLayout(panelBorder1Layout);
         panelBorder1Layout.setHorizontalGroup(
@@ -99,12 +135,9 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
                     .addComponent(lblHoTen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblManv, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(panelBorder1Layout.createSequentialGroup()
-                        .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
+                        .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                         .addGap(9, 9, 9)))
                 .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelBorder1Layout.createSequentialGroup()
-                        .addGap(154, 154, 154)
-                        .addComponent(pwdXacNhan, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                         .addGap(151, 151, 151)
                         .addComponent(pwdMKCu))
@@ -116,12 +149,18 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
                             .addComponent(lblMKMoi, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblXacNhan, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
-                                .addGap(206, 206, 206)
-                                .addComponent(btnDoiMK, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                                 .addGap(74, 74, 74)
-                                .addComponent(pwdMKMoi, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)))))
-                .addGap(165, 165, 165))
+                                .addComponent(pwdMKMoi))))
+                    .addGroup(panelBorder1Layout.createSequentialGroup()
+                        .addGap(154, 154, 154)
+                        .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pwdXacNhan)
+                            .addGroup(panelBorder1Layout.createSequentialGroup()
+                                .addComponent(btnDoiMK, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnHuy, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addGap(155, 155, 155))
         );
         panelBorder1Layout.setVerticalGroup(
             panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -149,9 +188,11 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
                         .addComponent(lblXacNhan, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(pwdXacNhan, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(21, 21, 21)
-                        .addComponent(btnDoiMK, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(256, 256, 256))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnDoiMK, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnHuy, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(266, 266, 266))))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -166,9 +207,20 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnDoiMKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDoiMKActionPerformed
+        doiMatKhau(pwdMKCu.getText(), pwdMKMoi.getText(), pwdXacNhan.getText());
+    }//GEN-LAST:event_btnDoiMKActionPerformed
+
+    private void btnHuyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHuyActionPerformed
+        pwdMKCu.setText("");
+        pwdMKMoi.setText("");
+        pwdXacNhan.setText("");
+    }//GEN-LAST:event_btnHuyActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDoiMK;
+    private javax.swing.JButton btnHuy;
     private javax.swing.JLabel lblHoTen;
     private javax.swing.JLabel lblImage;
     private javax.swing.JLabel lblKhoaHoc;

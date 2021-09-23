@@ -35,7 +35,7 @@ public class Header extends javax.swing.JPanel {
     protected void paintComponent(Graphics grphcs) {
         Graphics2D g2 = (Graphics2D) grphcs;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(new Color(204, 204, 204));
+        g2.setColor(Color.white);
 //        GradientPaint g = new GradientPaint(0,0,Color.decode("#4286f4"),0,getHeight(),Color.decode("#373B44"));
 //        g2.setPaint(g);
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);

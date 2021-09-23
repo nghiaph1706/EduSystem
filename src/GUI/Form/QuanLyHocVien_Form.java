@@ -1,18 +1,141 @@
 
 package GUI.Form;
 
+import DAO.ChuyenDeDAO;
+import DAO.HocVienDAO;
+import DAO.KhoaHocDAO;
+import DAO.NguoiHocDAO;
 import GUI.Swing.ScrollBar;
+import Model.ChuyenDe;
+import Model.HocVien;
+import Model.KhoaHoc;
+import Model.NguoiHoc;
+import Utilities.Auth;
+import Utilities.MsgBox;
 import java.awt.Color;
+import java.util.List;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.table.DefaultTableModel;
 
 public class QuanLyHocVien_Form extends javax.swing.JPanel {
+    
+    ChuyenDeDAO cddao = new ChuyenDeDAO();
+    KhoaHocDAO khdao = new KhoaHocDAO();
+    HocVienDAO hvdao = new HocVienDAO();
+    NguoiHocDAO nhdao = new NguoiHocDAO();
 
     public QuanLyHocVien_Form() {
         initComponents();
-        scrollTable.setVerticalScrollBar(new ScrollBar());
-        //add row
-        tblHocVien.addRowTable(new Object[]{"1025","PS01638","Lữ Huy Cường","5.0"});
-        tblNguoiHoc.addRowTable(new Object[]{"PS01638", "LỮ HUY CƯỜNG","NAM", "17/06/2002", "0928768265", "PS01638@fpt.edu.vn"});
+        intit();
     }
+    
+    void intit(){
+        scrollTable.setVerticalScrollBar(new ScrollBar());
+        scrollTable1.setVerticalScrollBar(new ScrollBar());
+        fillCbxChuyenDe();
+    }
+    
+    void fillCbxChuyenDe(){
+        DefaultComboBoxModel model = (DefaultComboBoxModel) cbxChuyenDe.getModel();
+        model.removeAllElements();
+        List<ChuyenDe> list = cddao.selectAll();
+        for (ChuyenDe chuyenDe : list) {
+            model.addElement(chuyenDe);
+        }
+        fillCbxKhoaHoc();
+    }
+    
+    void fillCbxKhoaHoc(){
+        DefaultComboBoxModel model = (DefaultComboBoxModel) cbxKhoaHoc.getModel();
+        model.removeAllElements();
+        ChuyenDe cd = (ChuyenDe) cbxChuyenDe.getSelectedItem();
+        if (cd != null) {
+            List<KhoaHoc> list = khdao.selectByChuyenDe(cd.getMaCD());
+            for (KhoaHoc khoaHoc : list) {
+                model.addElement(khoaHoc);
+            }
+        }
+        fillTableHocVien();
+    }
+    
+    void fillTableHocVien(){
+        DefaultTableModel model = (DefaultTableModel) tblHocVien.getModel();
+        model.setRowCount(0);
+        KhoaHoc kh = (KhoaHoc) cbxKhoaHoc.getSelectedItem();
+        if (kh != null) {
+            List<HocVien> list = hvdao.selectByKhoaHoc(kh.getMaKH());
+            for (int i = 0; i < list.size(); i++) {
+                HocVien hv = list.get(i);
+                String hoten = nhdao.selectById(hv.getMaNH()).getHoTen();
+                model.addRow(new Object[]{i+1,hv.getMaHV(),hv.getMaNH(),hoten,hv.getDiem()});
+            }
+            fillTableNguoiHoc();
+        }
+    }
+    
+    void fillTableNguoiHoc(){
+        DefaultTableModel model = (DefaultTableModel) tblNguoiHoc.getModel();
+        model.setRowCount(0);
+        KhoaHoc kh = (KhoaHoc) cbxKhoaHoc.getSelectedItem();
+        String key = txtFindNguoiHoc.getText();
+        List<NguoiHoc> list = nhdao.selectNotInCourse(kh.getMaKH(), key);
+        for (NguoiHoc nguoiHoc : list) {
+            model.addRow(new Object[]{nguoiHoc.getMaNH(),nguoiHoc.getHoTen(),nguoiHoc.getGioiTinh()?"Nam":"Nữ",
+            nguoiHoc.getNgaySinh(),nguoiHoc.getDienThoai(),nguoiHoc.getEmail()});
+        }
+    }
+    
+    void addHocVien(){
+        KhoaHoc kh = (KhoaHoc) cbxKhoaHoc.getSelectedItem();
+        for (int row : tblNguoiHoc.getSelectedRows()) {
+            HocVien hv = new HocVien();
+            hv.setMaKH(kh.getMaKH());
+            hv.setDiem(0);
+            hv.setMaNH((String) tblNguoiHoc.getValueAt(row, 0));
+            hvdao.insert(hv);
+        }
+        fillTableHocVien();
+        tabHVSelected(true);
+    }
+    
+    void removeHocVien(){
+        if (!Auth.isManager()) {
+            MsgBox.alert(this, "Bạn không có quyền xoá học viên.");
+        } else {
+            if(MsgBox.confirm(this, "Bạn muốn xoá các học viên được chọn?")){
+                for (int row : tblHocVien.getSelectedRows()) {
+                    int mahv = (int) tblHocVien.getValueAt(row, 0);
+                    hvdao.delete(mahv);
+                }
+            }
+            fillTableHocVien();
+        }
+    }
+    
+    void updateDiem(){
+        for (int i = 0; i < tblHocVien.getRowCount(); i++) {
+            int mahv = (int) tblHocVien.getValueAt(i, 1);
+            HocVien hv = hvdao.selectById(mahv);
+            hv.setDiem((double) tblHocVien.getValueAt(i, 4));
+            hvdao.update(hv);
+        }
+        MsgBox.alert(this, "Cập nhật điểm thành công.");
+    }
+    
+    void tabHVSelected(boolean bln) {
+        if (bln) {
+            HocVien.setBackground(new Color(60, 94, 150));
+            NguoiHoc.setBackground(new Color(63, 113, 194));
+            TabHocVienPanel.setVisible(true);
+            TabNguoiHocPanel.setVisible(false);
+        } else {
+            NguoiHoc.setBackground(new Color(60, 94, 150));
+            HocVien.setBackground(new Color(63, 113, 194));
+            TabNguoiHocPanel.setVisible(true);
+            TabHocVienPanel.setVisible(false);
+        }
+    }
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -32,17 +155,15 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         cbxChuyenDe = new javax.swing.JComboBox<>();
         lblKhoaHoc = new javax.swing.JLabel();
         cbxKhoaHoc = new javax.swing.JComboBox<>();
-        txtFind = new javax.swing.JTextField();
-        lblFind = new javax.swing.JLabel();
         BasicToolPanel = new javax.swing.JPanel();
         btnXoa = new javax.swing.JButton();
-        btnCapNhat = new javax.swing.JButton();
+        btnCapNhatDiem = new javax.swing.JButton();
         TabNguoiHocPanel = new GUI.Swing.PanelBorder();
         scrollTable1 = new javax.swing.JScrollPane();
         tblNguoiHoc = new GUI.Swing.Table();
         SearchBarPanel1 = new GUI.Swing.PanelBorder();
-        lblSearchIcon1 = new javax.swing.JLabel();
-        txtFind1 = new javax.swing.JTextField();
+        lblSearchIconNguoiHoc = new javax.swing.JLabel();
+        txtFindNguoiHoc = new javax.swing.JTextField();
         btnThem = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
@@ -130,9 +251,17 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Mã học viên", "Mã người học", "Họ tên", "Điểm"
+                "STT", "Mã học viên", "Mã người học", "Họ tên", "Điểm"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tblHocVien.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         scrollTable.setViewportView(tblHocVien);
 
@@ -141,28 +270,26 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         lblCD.setText("CHUYÊN ĐỀ:");
 
         cbxChuyenDe.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        cbxChuyenDe.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbxChuyenDe.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cbxChuyenDe.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        cbxChuyenDe.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbxChuyenDeActionPerformed(evt);
+            }
+        });
 
         lblKhoaHoc.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
         lblKhoaHoc.setForeground(new java.awt.Color(102, 102, 102));
         lblKhoaHoc.setText("KHOÁ HỌC:");
 
         cbxKhoaHoc.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        cbxKhoaHoc.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbxKhoaHoc.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cbxKhoaHoc.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-
-        txtFind.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        txtFind.setForeground(new java.awt.Color(102, 102, 102));
-        txtFind.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtFind.setText("Type here..");
-        txtFind.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        lblFind.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
-        lblFind.setForeground(new java.awt.Color(102, 102, 102));
-        lblFind.setText("TÌM KIẾM:");
+        cbxKhoaHoc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbxKhoaHocActionPerformed(evt);
+            }
+        });
 
         BasicToolPanel.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -170,11 +297,21 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnXoa.setForeground(new java.awt.Color(102, 102, 102));
         btnXoa.setText("Xoá khỏi khoá học");
+        btnXoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoaActionPerformed(evt);
+            }
+        });
 
-        btnCapNhat.setBackground(new java.awt.Color(255, 255, 255));
-        btnCapNhat.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnCapNhat.setForeground(new java.awt.Color(102, 102, 102));
-        btnCapNhat.setText("Cập nhật điểm");
+        btnCapNhatDiem.setBackground(new java.awt.Color(255, 255, 255));
+        btnCapNhatDiem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnCapNhatDiem.setForeground(new java.awt.Color(102, 102, 102));
+        btnCapNhatDiem.setText("Cập nhật điểm");
+        btnCapNhatDiem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCapNhatDiemActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout BasicToolPanelLayout = new javax.swing.GroupLayout(BasicToolPanel);
         BasicToolPanel.setLayout(BasicToolPanelLayout);
@@ -184,14 +321,14 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
+                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
                 .addContainerGap())
         );
         BasicToolPanelLayout.setVerticalGroup(
             BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                .addComponent(btnCapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE))
+                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout TabHocVienPanelLayout = new javax.swing.GroupLayout(TabHocVienPanel);
@@ -213,12 +350,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
                                 .addComponent(lblKhoaHoc, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
                                 .addGap(126, 126, 126))
                             .addComponent(cbxKhoaHoc, 0, 281, Short.MAX_VALUE))
-                        .addGap(68, 68, 68)
-                        .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(TabHocVienPanelLayout.createSequentialGroup()
-                                .addComponent(lblFind, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
-                                .addGap(151, 151, 151))
-                            .addComponent(txtFind, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)))
+                        .addGap(374, 374, 374))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabHocVienPanelLayout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)))
@@ -232,16 +364,13 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(TabHocVienPanelLayout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblCD, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblKhoaHoc, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lblFind, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblCD, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblKhoaHoc, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(6, 6, 6)
                 .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cbxChuyenDe, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cbxKhoaHoc, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFind, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbxKhoaHoc, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(31, 31, 31)
                 .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
@@ -263,7 +392,15 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             new String [] {
                 "Mã người học", "Họ và tên", "Giới tính", "Ngày sinh", "Điện thoại", "Email"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tblNguoiHoc.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
         scrollTable1.setViewportView(tblNguoiHoc);
         if (tblNguoiHoc.getColumnModel().getColumnCount() > 0) {
@@ -283,23 +420,34 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
 
         SearchBarPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        lblSearchIcon1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/search.png"))); // NOI18N
-        lblSearchIcon1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        lblSearchIconNguoiHoc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/search.png"))); // NOI18N
+        lblSearchIconNguoiHoc.setToolTipText("Tìm người học theo họ tên.");
+        lblSearchIconNguoiHoc.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        lblSearchIconNguoiHoc.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblSearchIconNguoiHocMouseClicked(evt);
+            }
+        });
 
-        txtFind1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        txtFind1.setForeground(new java.awt.Color(102, 102, 102));
-        txtFind1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtFind1.setText("Type here..");
-        txtFind1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtFindNguoiHoc.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+        txtFindNguoiHoc.setForeground(new java.awt.Color(102, 102, 102));
+        txtFindNguoiHoc.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtFindNguoiHoc.setToolTipText("Tìm người học theo họ tên.");
+        txtFindNguoiHoc.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtFindNguoiHoc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtFindNguoiHocActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout SearchBarPanel1Layout = new javax.swing.GroupLayout(SearchBarPanel1);
         SearchBarPanel1.setLayout(SearchBarPanel1Layout);
         SearchBarPanel1Layout.setHorizontalGroup(
             SearchBarPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SearchBarPanel1Layout.createSequentialGroup()
-                .addComponent(lblSearchIcon1)
+                .addComponent(lblSearchIconNguoiHoc)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFind1, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+                .addComponent(txtFindNguoiHoc, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
                 .addGap(20, 20, 20))
         );
         SearchBarPanel1Layout.setVerticalGroup(
@@ -307,14 +455,19 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             .addGroup(SearchBarPanel1Layout.createSequentialGroup()
                 .addGap(0, 0, 0)
                 .addGroup(SearchBarPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblSearchIcon1)
-                    .addComponent(txtFind1, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(lblSearchIconNguoiHoc)
+                    .addComponent(txtFindNguoiHoc, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         btnThem.setBackground(new java.awt.Color(255, 255, 255));
         btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnThem.setForeground(new java.awt.Color(102, 102, 102));
         btnThem.setText("Thêm vào khoá học");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout TabNguoiHocPanelLayout = new javax.swing.GroupLayout(TabNguoiHocPanel);
         TabNguoiHocPanel.setLayout(TabNguoiHocPanelLayout);
@@ -381,18 +534,40 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void HocVienMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_HocVienMouseClicked
-        HocVien.setBackground(new Color(60,94,150));
-        NguoiHoc.setBackground(new Color(63,113,194));
-        TabHocVienPanel.setVisible(true);
-        TabNguoiHocPanel.setVisible(false);
+        tabHVSelected(true);
     }//GEN-LAST:event_HocVienMouseClicked
 
     private void NguoiHocMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_NguoiHocMouseClicked
-        NguoiHoc.setBackground(new Color(60,94,150));
-        HocVien.setBackground(new Color(63,113,194));
-        TabNguoiHocPanel.setVisible(true);
-        TabHocVienPanel.setVisible(false);
+        tabHVSelected(false);
     }//GEN-LAST:event_NguoiHocMouseClicked
+
+    private void cbxChuyenDeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxChuyenDeActionPerformed
+        fillCbxKhoaHoc();
+    }//GEN-LAST:event_cbxChuyenDeActionPerformed
+
+    private void cbxKhoaHocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxKhoaHocActionPerformed
+        fillTableHocVien();
+    }//GEN-LAST:event_cbxKhoaHocActionPerformed
+
+    private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
+        removeHocVien();
+    }//GEN-LAST:event_btnXoaActionPerformed
+
+    private void btnCapNhatDiemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCapNhatDiemActionPerformed
+        updateDiem();
+    }//GEN-LAST:event_btnCapNhatDiemActionPerformed
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        addHocVien();
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private void lblSearchIconNguoiHocMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchIconNguoiHocMouseClicked
+        fillTableNguoiHoc();
+    }//GEN-LAST:event_lblSearchIconNguoiHocMouseClicked
+
+    private void txtFindNguoiHocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFindNguoiHocActionPerformed
+        fillTableNguoiHoc();
+    }//GEN-LAST:event_txtFindNguoiHocActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -404,23 +579,21 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
     private GUI.Swing.PanelBorder TabHocVienPanel;
     private GUI.Swing.PanelBorder TabMainPanel;
     private GUI.Swing.PanelBorder TabNguoiHocPanel;
-    private javax.swing.JButton btnCapNhat;
+    private javax.swing.JButton btnCapNhatDiem;
     private javax.swing.JButton btnThem;
     private javax.swing.JButton btnXoa;
     private javax.swing.JComboBox<String> cbxChuyenDe;
     private javax.swing.JComboBox<String> cbxKhoaHoc;
     private javax.swing.JLabel lblCD;
-    private javax.swing.JLabel lblFind;
     private javax.swing.JLabel lblHocVien;
     private javax.swing.JLabel lblKhoaHoc;
     private javax.swing.JLabel lblNguoiHoc;
-    private javax.swing.JLabel lblSearchIcon1;
+    private javax.swing.JLabel lblSearchIconNguoiHoc;
     private GUI.Swing.PanelBorder panelBorder1;
     private javax.swing.JScrollPane scrollTable;
     private javax.swing.JScrollPane scrollTable1;
     private GUI.Swing.Table tblHocVien;
     private GUI.Swing.Table tblNguoiHoc;
-    private javax.swing.JTextField txtFind;
-    private javax.swing.JTextField txtFind1;
+    private javax.swing.JTextField txtFindNguoiHoc;
     // End of variables declaration//GEN-END:variables
 }

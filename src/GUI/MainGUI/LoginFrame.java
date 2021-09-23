@@ -1,11 +1,17 @@
 
 package GUI.MainGUI;
 
+import DAO.NhanVienDAO;
+import Model.NhanVien;
+import Utilities.Auth;
+import Utilities.MsgBox;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 
 public class LoginFrame extends javax.swing.JFrame {
-
+    
+    NhanVienDAO dao = new NhanVienDAO();
+    
     public LoginFrame() {
         initComponents();
         setLocationRelativeTo(this);
@@ -14,6 +20,20 @@ public class LoginFrame extends javax.swing.JFrame {
         ii = new ImageIcon(img);
         lblLogoFPT.setIcon(ii);
     }
+    
+    void dangNhap(String manv, String matkhau){
+        NhanVien nhanVien = dao.selectById(manv);
+        if (nhanVien == null) {
+            MsgBox.alert(this, "Sai tên đăng nhập.");
+        } else if (!matkhau.equals(nhanVien.getMatKhau())) {
+            MsgBox.alert(this, "Sai mật khẩu.");
+        } else {
+            Auth.user = nhanVien;
+            new MainFrame().setVisible(true);
+            this.dispose();
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -54,7 +74,7 @@ public class LoginFrame extends javax.swing.JFrame {
         txtUser.setFont(new java.awt.Font("Tahoma", 3, 16)); // NOI18N
         txtUser.setForeground(new java.awt.Color(102, 102, 102));
         txtUser.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtUser.setText("Username");
+        txtUser.setText("TeoNV");
         txtUser.setBorder(null);
         txtUser.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -71,7 +91,7 @@ public class LoginFrame extends javax.swing.JFrame {
         pwdPass.setFont(new java.awt.Font("Tahoma", 3, 16)); // NOI18N
         pwdPass.setForeground(new java.awt.Color(102, 102, 102));
         pwdPass.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        pwdPass.setText("Password");
+        pwdPass.setText("123456");
         pwdPass.setBorder(null);
         pwdPass.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -84,6 +104,11 @@ public class LoginFrame extends javax.swing.JFrame {
         btnDangNhap.setForeground(new java.awt.Color(102, 102, 102));
         btnDangNhap.setText("ĐĂNG NHẬP");
         btnDangNhap.setActionCommand("");
+        btnDangNhap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDangNhapActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelBorderGradient2Layout = new javax.swing.GroupLayout(panelBorderGradient2);
         panelBorderGradient2.setLayout(panelBorderGradient2Layout);
@@ -176,6 +201,10 @@ public class LoginFrame extends javax.swing.JFrame {
     private void txtUserMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtUserMouseClicked
         txtUser.setText("");
     }//GEN-LAST:event_txtUserMouseClicked
+
+    private void btnDangNhapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDangNhapActionPerformed
+        dangNhap(txtUser.getText(), pwdPass.getText());
+    }//GEN-LAST:event_btnDangNhapActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */

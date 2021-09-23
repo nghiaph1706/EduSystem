@@ -41,8 +41,5 @@ public class Table extends JTable {
         });
     }
     
-    public void addRowTable(Object[] row){
-        DefaultTableModel model = (DefaultTableModel) getModel();
-        model.addRow(row);
-    }
+    
 }

@@ -1,16 +1,225 @@
-
 package GUI.Form;
 
+import DAO.ChuyenDeDAO;
+import DAO.KhoaHocDAO;
 import GUI.Swing.ScrollBar;
+import Model.ChuyenDe;
+import Model.KhoaHoc;
+import Utilities.Auth;
+import Utilities.MsgBox;
+import Utilities.XDate;
 import java.awt.Color;
+import java.util.List;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.table.DefaultTableModel;
 
 public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
 
+    ChuyenDeDAO cddao = new ChuyenDeDAO();
+    KhoaHocDAO dao = new KhoaHocDAO();
+    int row = -1;
+
     public QuanLyKhoaHoc_Form() {
         initComponents();
+        intit();
+    }
+    
+    void intit(){
         scrollTable.setVerticalScrollBar(new ScrollBar());
-        //add row
-        tblKhoaHoc.addRowTable(new Object[]{"1", "PRO02", "90", "300", "20-09-202","TeoNV", "30-07-2020"});
+        fillTable();
+        fillcbxChuyenDe();
+        clearForm();
+        updateStatus();
+        row = -1;
+        tabDSSelected(true);
+    }
+    
+    void fillTable() {
+        DefaultTableModel model = (DefaultTableModel) tblKhoaHoc.getModel();
+        model.setRowCount(0);
+        try {
+            String keyword = txtFind.getText();
+            List<KhoaHoc> list = dao.selectByKeyword(keyword);
+            for (KhoaHoc kh : list) {
+                Object[] row = {kh.getMaKH(), kh.getMaCD(), kh.getThoiLuong(), kh.getHocPhi(), kh.getNgayKG(), kh.getMaNV(), kh.getNgayTao()};
+                model.addRow(row);
+            }
+        } catch (Exception e) {
+            MsgBox.alert(this, "Lỗi truy vấn dữ liệu.");
+            System.err.println(e);
+        }
+    }
+    
+    void edit() {
+        try {
+            Integer makh = (Integer) tblKhoaHoc.getValueAt(this.row, 0);
+            KhoaHoc kh = dao.selectById(makh);
+            if (kh != null) {
+                this.setForm(kh);
+                updateStatus();
+            }
+        } catch (Exception e) {
+        }
+    }
+    
+    void updateStatus() {
+        boolean edit = (this.row >= 0);
+        btnXoa.setEnabled(edit);
+        btnCapNhat.setEnabled(edit);
+        btnLuu.setEnabled(!edit);
+        txtChuyenDe.setEnabled(false);
+        boolean first = (this.row==0);
+        boolean last = (this.row==tblKhoaHoc.getRowCount()-1);
+        btnFisrt.setEnabled(!first);
+        btnPrev.setEnabled(!first);
+        btnLast.setEnabled(!last);
+        btnNext.setEnabled(!last);
+    }
+    
+    KhoaHoc getForm() {
+        KhoaHoc kh = new KhoaHoc();
+        ChuyenDe chuyenDe = (ChuyenDe) cbxChuyenDe.getSelectedItem();
+        kh.setMaCD(chuyenDe.getMaCD());
+        kh.setNgayKG(XDate.toDate(txtNgayKhaiGiang.getText()));
+        kh.setHocPhi(Double.valueOf(txtHocPhi.getText()));
+        kh.setThoiLuong(Integer.valueOf(txtThoiLuong.getText()));
+        kh.setGhiChu(txtGhiChu.getText());
+        kh.setMaNV(Auth.user.getMaNV());
+        kh.setNgayTao(XDate.toDate(txtNgayTao.getText()));
+        kh.setMaKH(Integer.valueOf(cbxChuyenDe.getToolTipText()));
+        return kh;
+    }
+    
+    void setForm(KhoaHoc kh) {
+        cbxChuyenDe.setToolTipText(String.valueOf(kh.getMaKH()));
+        cbxChuyenDe.getModel().setSelectedItem(cddao.selectById(kh.getMaCD()));
+        txtNgayKhaiGiang.setText(XDate.toString(kh.getNgayKG()));
+        txtHocPhi.setText(String.valueOf(kh.getHocPhi()));
+        txtThoiLuong.setText(String.valueOf(kh.getThoiLuong()));
+        txtNguoiTao.setText(kh.getMaNV());
+        txtNgayTao.setText(XDate.toString(kh.getNgayTao()));
+        txtGhiChu.setText(kh.getGhiChu());
+    }
+    
+    void clearForm() {
+        KhoaHoc kh = new KhoaHoc();
+        ChuyenDe chuyenDe = (ChuyenDe) cbxChuyenDe.getSelectedItem();
+        kh.setMaCD(chuyenDe.getMaCD());
+        kh.setMaNV(Auth.user.getMaNV());
+        kh.setNgayKG(XDate.add(30));
+        kh.setNgayTao(XDate.now());
+        this.setForm(kh);
+        this.row=-1;
+    }
+    
+    void insert() {
+        KhoaHoc kh = getForm();
+        kh.setNgayTao(XDate.now());
+        try {
+            dao.insert(kh);
+            this.fillTable();
+            this.clearForm();
+            MsgBox.alert(this, "Thêm mới thành công!");
+        } catch (Exception e) {
+            MsgBox.alert(this, "Thêm mới thất bại!");
+        }
+    }
+
+    void update() {
+        KhoaHoc kh = getForm();
+        try {
+            dao.update(kh);
+            this.fillTable();
+            this.setForm(kh);
+            MsgBox.alert(this, "Cập nhật thành công!");
+        } catch (Exception e) {
+            MsgBox.alert(this, "Cập nhật thất bại!");
+        }
+    }
+
+    void delete() {
+        if (MsgBox.confirm(this, "Bạn thực sự muốn xóa khóa học này?")) {
+            Integer makh = Integer.valueOf(cbxChuyenDe.getToolTipText());
+            try {
+                dao.delete(makh);
+                this.fillTable();
+                this.clearForm();
+                this.fillcbxChuyenDe();
+                MsgBox.alert(this, "Xóa thành công!");
+            } catch (Exception e) {
+                MsgBox.alert(this, "Xóa thất bại!");
+            }
+        }
+    }
+    
+    void first() {
+        row = 0;
+        edit();
+    }
+
+    void next() {
+        if (row < tblKhoaHoc.getRowCount() - 1) {
+            row++;
+            edit();
+        }
+    }
+
+    void prev() {
+        if (row > 0) {
+            row--;
+            edit();
+        }
+    }
+
+    void last() {
+        row = tblKhoaHoc.getRowCount() - 1;
+        edit();
+    }
+    
+    void tabDSSelected(boolean bln) {
+        if (bln) {
+            DanhSach.setBackground(new Color(60, 94, 150));
+            CapNhat.setBackground(new Color(63, 113, 194));
+            TabDanhSachPanel.setVisible(true);
+            TabCapNhatPanel.setVisible(false);
+        } else {
+            CapNhat.setBackground(new Color(60, 94, 150));
+            DanhSach.setBackground(new Color(63, 113, 194));
+            TabCapNhatPanel.setVisible(true);
+            TabDanhSachPanel.setVisible(false);
+        }
+    }
+
+    void fillcbxChuyenDe() {
+        DefaultComboBoxModel model = (DefaultComboBoxModel) cbxChuyenDe.getModel();
+        model.removeAllElements();
+        try {
+            List<ChuyenDe> list = cddao.selectAll();
+            for (ChuyenDe cd : list) {
+                model.addElement(cd);
+            }
+        } catch (Exception e) {
+            MsgBox.alert(this, "Lỗi truy vấn dữ liệu!");
+        }
+    }
+
+    void chonChuyenDe() {
+        ChuyenDe cd = (ChuyenDe) cbxChuyenDe.getSelectedItem();
+        txtThoiLuong.setText(String.valueOf(cd.getThoiLuong()));
+        txtHocPhi.setText(String.valueOf(cd.getHocPhi()));
+        txtChuyenDe.setText(cd.getTenCD());
+        txtGhiChu.setText(cd.getTenCD());
+        txtChuyenDe.setEnabled(false);
+        fillTable();
+        updateStatus();
+        tabDSSelected(false);
+    }
+    
+    void timKiem(){
+        fillTable();
+        clearForm();
+        row = -1;
+        updateStatus();
     }
 
     @SuppressWarnings("unchecked")
@@ -23,6 +232,8 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         lblDanhSach = new javax.swing.JLabel();
         CapNhat = new javax.swing.JPanel();
         lblCapNhat = new javax.swing.JLabel();
+        lblcbxCD = new javax.swing.JLabel();
+        cbxChuyenDe = new javax.swing.JComboBox<>();
         TabMainPanel = new GUI.Swing.PanelBorder();
         TabDanhSachPanel = new GUI.Swing.PanelBorder();
         SearchBarPanel = new GUI.Swing.PanelBorder();
@@ -40,10 +251,6 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         txtHocPhi = new javax.swing.JTextField();
         lblGhiChu = new javax.swing.JLabel();
         txtGhiChu = new javax.swing.JTextArea();
-        BasicToolPanel1 = new javax.swing.JPanel();
-        btnThem = new javax.swing.JButton();
-        btnLuu = new javax.swing.JButton();
-        btnXoa = new javax.swing.JButton();
         MovingBtnPanel = new javax.swing.JPanel();
         btnFisrt = new javax.swing.JButton();
         btnPrev = new javax.swing.JButton();
@@ -53,7 +260,12 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         lblNgayTao = new javax.swing.JLabel();
         txtNgayTao = new javax.swing.JTextField();
         txtNguoiTao = new javax.swing.JTextField();
-        cbxChuyenDe = new javax.swing.JComboBox<>();
+        txtChuyenDe = new javax.swing.JTextField();
+        BasicToolPanel1 = new javax.swing.JPanel();
+        btnThem = new javax.swing.JButton();
+        btnLuu = new javax.swing.JButton();
+        btnXoa = new javax.swing.JButton();
+        btnCapNhat = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
@@ -108,23 +320,49 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         );
         CapNhatLayout.setVerticalGroup(
             CapNhatLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblCapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
+            .addComponent(lblCapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
         );
+
+        lblcbxCD.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
+        lblcbxCD.setForeground(new java.awt.Color(102, 102, 102));
+        lblcbxCD.setText("CHUYÊN ĐỀ:");
+
+        cbxChuyenDe.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        cbxChuyenDe.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cbxChuyenDe.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        cbxChuyenDe.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbxChuyenDeActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout TabBarPanelLayout = new javax.swing.GroupLayout(TabBarPanel);
         TabBarPanel.setLayout(TabBarPanelLayout);
         TabBarPanelLayout.setHorizontalGroup(
             TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(TabBarPanelLayout.createSequentialGroup()
-                .addComponent(DanhSach, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, TabBarPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblcbxCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(DanhSach, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, 0)
-                .addComponent(CapNhat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(CapNhat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbxChuyenDe, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         TabBarPanelLayout.setVerticalGroup(
             TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(CapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(DanhSach, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabBarPanelLayout.createSequentialGroup()
+                .addGap(0, 26, Short.MAX_VALUE)
+                .addGroup(TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblcbxCD, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbxChuyenDe, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(CapNhat, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(DanhSach, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         TabMainPanel.setBackground(new java.awt.Color(255, 255, 255));
@@ -135,12 +373,18 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         SearchBarPanel.setBackground(new java.awt.Color(255, 255, 255));
 
         lblSearchIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/search.png"))); // NOI18N
+        lblSearchIcon.setToolTipText("Tìm theo mã chuyên đề.");
         lblSearchIcon.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        lblSearchIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblSearchIconMouseClicked(evt);
+            }
+        });
 
-        txtFind.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtFind.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtFind.setForeground(new java.awt.Color(102, 102, 102));
         txtFind.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtFind.setText("Type here..");
+        txtFind.setToolTipText("Tìm theo mã chuyên đề.");
         txtFind.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout SearchBarPanelLayout = new javax.swing.GroupLayout(SearchBarPanel);
@@ -172,8 +416,21 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
             new String [] {
                 "Mã KH", "Chuyên đề", "Thời lượng", "Học phí", "Ngày khai giảng", "Người tạo", "Ngày tạo"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tblKhoaHoc.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        tblKhoaHoc.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblKhoaHocMouseClicked(evt);
+            }
+        });
         scrollTable.setViewportView(tblKhoaHoc);
         if (tblKhoaHoc.getColumnModel().getColumnCount() > 0) {
             tblKhoaHoc.getColumnModel().getColumn(0).setMinWidth(120);
@@ -206,7 +463,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                 .addGap(50, 50, 50)
                 .addComponent(SearchBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
-                .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
+                .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
                 .addGap(77, 77, 77))
         );
 
@@ -222,16 +479,14 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         lblNgayKhaiGiang.setForeground(new java.awt.Color(102, 102, 102));
         lblNgayKhaiGiang.setText("NGÀY KHAI GIẢNG:");
 
-        txtNgayKhaiGiang.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtNgayKhaiGiang.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtNgayKhaiGiang.setForeground(new java.awt.Color(102, 102, 102));
         txtNgayKhaiGiang.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtNgayKhaiGiang.setText("Type here..");
         txtNgayKhaiGiang.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        txtThoiLuong.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtThoiLuong.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtThoiLuong.setForeground(new java.awt.Color(102, 102, 102));
         txtThoiLuong.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtThoiLuong.setText("Type here..");
         txtThoiLuong.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblThoiLuong.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
@@ -242,10 +497,9 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         lblHocPhi.setForeground(new java.awt.Color(102, 102, 102));
         lblHocPhi.setText("HỌC PHÍ:");
 
-        txtHocPhi.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtHocPhi.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtHocPhi.setForeground(new java.awt.Color(102, 102, 102));
         txtHocPhi.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtHocPhi.setText("Type here..");
         txtHocPhi.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblGhiChu.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
@@ -253,46 +507,9 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         lblGhiChu.setText("GHI CHÚ:");
 
         txtGhiChu.setColumns(20);
-        txtGhiChu.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtGhiChu.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtGhiChu.setRows(5);
         txtGhiChu.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        BasicToolPanel1.setBackground(new java.awt.Color(255, 255, 255));
-
-        btnThem.setBackground(new java.awt.Color(255, 255, 255));
-        btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnThem.setForeground(new java.awt.Color(102, 102, 102));
-        btnThem.setText("Thêm mới");
-
-        btnLuu.setBackground(new java.awt.Color(255, 255, 255));
-        btnLuu.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnLuu.setForeground(new java.awt.Color(102, 102, 102));
-        btnLuu.setText("Lưu");
-
-        btnXoa.setBackground(new java.awt.Color(255, 255, 255));
-        btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnXoa.setForeground(new java.awt.Color(102, 102, 102));
-        btnXoa.setText("Xoá");
-
-        javax.swing.GroupLayout BasicToolPanel1Layout = new javax.swing.GroupLayout(BasicToolPanel1);
-        BasicToolPanel1.setLayout(BasicToolPanel1Layout);
-        BasicToolPanel1Layout.setHorizontalGroup(
-            BasicToolPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(BasicToolPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(btnThem, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnLuu, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
-                .addGap(25, 25, 25))
-        );
-        BasicToolPanel1Layout.setVerticalGroup(
-            BasicToolPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnThem, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(btnLuu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
 
         MovingBtnPanel.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -300,21 +517,41 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         btnFisrt.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnFisrt.setForeground(new java.awt.Color(102, 102, 102));
         btnFisrt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/first.png"))); // NOI18N
+        btnFisrt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFisrtActionPerformed(evt);
+            }
+        });
 
         btnPrev.setBackground(new java.awt.Color(255, 255, 255));
         btnPrev.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnPrev.setForeground(new java.awt.Color(102, 102, 102));
         btnPrev.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/prev.png"))); // NOI18N
+        btnPrev.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrevActionPerformed(evt);
+            }
+        });
 
         btnNext.setBackground(new java.awt.Color(255, 255, 255));
         btnNext.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnNext.setForeground(new java.awt.Color(102, 102, 102));
         btnNext.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/next.png"))); // NOI18N
+        btnNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextActionPerformed(evt);
+            }
+        });
 
         btnLast.setBackground(new java.awt.Color(255, 255, 255));
         btnLast.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnLast.setForeground(new java.awt.Color(102, 102, 102));
         btnLast.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/last.png"))); // NOI18N
+        btnLast.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLastActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout MovingBtnPanelLayout = new javax.swing.GroupLayout(MovingBtnPanel);
         MovingBtnPanel.setLayout(MovingBtnPanelLayout);
@@ -322,13 +559,13 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
             MovingBtnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(MovingBtnPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnFisrt, javax.swing.GroupLayout.PREFERRED_SIZE, 39, Short.MAX_VALUE)
+                .addComponent(btnFisrt, javax.swing.GroupLayout.PREFERRED_SIZE, 54, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnPrev, javax.swing.GroupLayout.PREFERRED_SIZE, 39, Short.MAX_VALUE)
+                .addComponent(btnPrev, javax.swing.GroupLayout.PREFERRED_SIZE, 56, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnNext, javax.swing.GroupLayout.PREFERRED_SIZE, 39, Short.MAX_VALUE)
+                .addComponent(btnNext, javax.swing.GroupLayout.PREFERRED_SIZE, 55, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnLast, javax.swing.GroupLayout.PREFERRED_SIZE, 39, Short.MAX_VALUE)
+                .addComponent(btnLast, javax.swing.GroupLayout.PREFERRED_SIZE, 55, Short.MAX_VALUE)
                 .addContainerGap())
         );
         MovingBtnPanelLayout.setVerticalGroup(
@@ -347,22 +584,84 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         lblNgayTao.setForeground(new java.awt.Color(102, 102, 102));
         lblNgayTao.setText("NGÀY TẠO:");
 
-        txtNgayTao.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtNgayTao.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtNgayTao.setForeground(new java.awt.Color(102, 102, 102));
         txtNgayTao.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtNgayTao.setText("Type here..");
         txtNgayTao.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        txtNguoiTao.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtNguoiTao.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtNguoiTao.setForeground(new java.awt.Color(102, 102, 102));
         txtNguoiTao.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtNguoiTao.setText("Type here..");
         txtNguoiTao.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        cbxChuyenDe.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        cbxChuyenDe.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbxChuyenDe.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cbxChuyenDe.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txtChuyenDe.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+        txtChuyenDe.setForeground(new java.awt.Color(102, 102, 102));
+        txtChuyenDe.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtChuyenDe.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        BasicToolPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        btnThem.setBackground(new java.awt.Color(255, 255, 255));
+        btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnThem.setForeground(new java.awt.Color(102, 102, 102));
+        btnThem.setText("Thêm mới");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
+
+        btnLuu.setBackground(new java.awt.Color(255, 255, 255));
+        btnLuu.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnLuu.setForeground(new java.awt.Color(102, 102, 102));
+        btnLuu.setText("Lưu");
+        btnLuu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLuuActionPerformed(evt);
+            }
+        });
+
+        btnXoa.setBackground(new java.awt.Color(255, 255, 255));
+        btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnXoa.setForeground(new java.awt.Color(102, 102, 102));
+        btnXoa.setText("Xoá");
+        btnXoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoaActionPerformed(evt);
+            }
+        });
+
+        btnCapNhat.setBackground(new java.awt.Color(255, 255, 255));
+        btnCapNhat.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnCapNhat.setForeground(new java.awt.Color(102, 102, 102));
+        btnCapNhat.setText("Cập nhật");
+        btnCapNhat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCapNhatActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout BasicToolPanel1Layout = new javax.swing.GroupLayout(BasicToolPanel1);
+        BasicToolPanel1.setLayout(BasicToolPanel1Layout);
+        BasicToolPanel1Layout.setHorizontalGroup(
+            BasicToolPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(BasicToolPanel1Layout.createSequentialGroup()
+                .addComponent(btnThem)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnLuu, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnCapNhat, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnXoa, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        BasicToolPanel1Layout.setVerticalGroup(
+            BasicToolPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnThem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnLuu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnCapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout TabCapNhatPanelLayout = new javax.swing.GroupLayout(TabCapNhatPanel);
         TabCapNhatPanel.setLayout(TabCapNhatPanelLayout);
@@ -386,7 +685,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                                         .addGap(495, 495, 495))
                                     .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
                                         .addComponent(BasicToolPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGap(35, 35, 35)
+                                        .addGap(26, 26, 26)
                                         .addComponent(MovingBtnPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                     .addComponent(txtGhiChu, javax.swing.GroupLayout.DEFAULT_SIZE, 703, Short.MAX_VALUE))))
                         .addGap(34, 34, 34))
@@ -394,12 +693,12 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                         .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtHocPhi, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
                             .addComponent(txtNguoiTao, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
-                            .addComponent(cbxChuyenDe, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
                                 .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(lblHocPhi, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
                                     .addComponent(lblNguoiTao, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE))
-                                .addGap(228, 228, 228)))
+                                .addGap(228, 228, 228))
+                            .addComponent(txtChuyenDe))
                         .addGap(39, 39, 39)
                         .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtThoiLuong)
@@ -420,9 +719,9 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                     .addComponent(lblCD, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblNgayKhaiGiang, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtNgayKhaiGiang, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cbxChuyenDe, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtChuyenDe, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(44, 44, 44)
                 .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblHocPhi, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -440,15 +739,14 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                     .addComponent(txtNguoiTao, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtNgayTao, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(30, 30, 30)
-                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                        .addComponent(lblGhiChu, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtGhiChu, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
-                        .addGap(32, 32, 32)
-                        .addComponent(BasicToolPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(MovingBtnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(137, 137, 137))
+                .addComponent(lblGhiChu, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtGhiChu, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
+                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(MovingBtnPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(BasicToolPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
 
         TabMainPanel.add(TabCapNhatPanel, "card3");
@@ -463,9 +761,9 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         panelBorder1Layout.setVerticalGroup(
             panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelBorder1Layout.createSequentialGroup()
-                .addComponent(TabBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(TabMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(TabBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(TabMainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 641, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -487,18 +785,60 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void DanhSachMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DanhSachMouseClicked
-        DanhSach.setBackground(new Color(60,94,150));
-        CapNhat.setBackground(new Color(63,113,194));
-        TabDanhSachPanel.setVisible(true);
-        TabCapNhatPanel.setVisible(false);
+        tabDSSelected(true);
     }//GEN-LAST:event_DanhSachMouseClicked
 
     private void CapNhatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CapNhatMouseClicked
-        CapNhat.setBackground(new Color(60,94,150));
-        DanhSach.setBackground(new Color(63,113,194));
-        TabCapNhatPanel.setVisible(true);
-        TabDanhSachPanel.setVisible(false);
+        tabDSSelected(false);
     }//GEN-LAST:event_CapNhatMouseClicked
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        clearForm();
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private void btnLuuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLuuActionPerformed
+        insert();
+    }//GEN-LAST:event_btnLuuActionPerformed
+
+    private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
+        delete();
+    }//GEN-LAST:event_btnXoaActionPerformed
+
+    private void btnCapNhatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCapNhatActionPerformed
+        update();
+    }//GEN-LAST:event_btnCapNhatActionPerformed
+
+    private void tblKhoaHocMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblKhoaHocMouseClicked
+        if (evt.getClickCount() == 2) {
+            this.row = tblKhoaHoc.getSelectedRow();
+            this.edit();
+            tabDSSelected(false);
+        }
+    }//GEN-LAST:event_tblKhoaHocMouseClicked
+
+    private void btnFisrtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFisrtActionPerformed
+        first();
+    }//GEN-LAST:event_btnFisrtActionPerformed
+
+    private void btnPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrevActionPerformed
+        prev();
+    }//GEN-LAST:event_btnPrevActionPerformed
+
+    private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        next();
+    }//GEN-LAST:event_btnNextActionPerformed
+
+    private void btnLastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLastActionPerformed
+        last();
+    }//GEN-LAST:event_btnLastActionPerformed
+
+    private void cbxChuyenDeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxChuyenDeActionPerformed
+        chonChuyenDe();
+    }//GEN-LAST:event_cbxChuyenDeActionPerformed
+
+    private void lblSearchIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchIconMouseClicked
+        timKiem();
+    }//GEN-LAST:event_lblSearchIconMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -511,6 +851,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
     private GUI.Swing.PanelBorder TabCapNhatPanel;
     private GUI.Swing.PanelBorder TabDanhSachPanel;
     private GUI.Swing.PanelBorder TabMainPanel;
+    private javax.swing.JButton btnCapNhat;
     private javax.swing.JButton btnFisrt;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnLuu;
@@ -529,9 +870,11 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
     private javax.swing.JLabel lblNguoiTao;
     private javax.swing.JLabel lblSearchIcon;
     private javax.swing.JLabel lblThoiLuong;
+    private javax.swing.JLabel lblcbxCD;
     private GUI.Swing.PanelBorder panelBorder1;
     private javax.swing.JScrollPane scrollTable;
     private GUI.Swing.Table tblKhoaHoc;
+    private javax.swing.JTextField txtChuyenDe;
     private javax.swing.JTextField txtFind;
     private javax.swing.JTextArea txtGhiChu;
     private javax.swing.JTextField txtHocPhi;

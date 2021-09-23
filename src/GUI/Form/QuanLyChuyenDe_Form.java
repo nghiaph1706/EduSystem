@@ -1,29 +1,209 @@
-
 package GUI.Form;
 
+import DAO.ChuyenDeDAO;
 import GUI.Swing.ScrollBar;
+import Model.ChuyenDe;
+import Utilities.MsgBox;
+import Utilities.XImage;
 import java.awt.Color;
 import java.awt.Image;
+import java.io.File;
+import java.util.List;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 
 public class QuanLyChuyenDe_Form extends JPanel {
 
+    ChuyenDeDAO dao = new ChuyenDeDAO();
+    int row = -1;
+
     public QuanLyChuyenDe_Form() {
         initComponents();
-        scrollTable.setVerticalScrollBar(new ScrollBar());
-        //add row
-        tblChuyenDe.addRowTable(new Object[]{"JAV01", "Lập trình Java cơ bản", "300", "90"});
-        System.out.println(lblImage.getPreferredSize().width+" "+lblImage.getPreferredSize().height);
-        ImageIcon ii = new ImageIcon(this.getClass().getResource("/GUI/Icon/MenuItemIcon/1.png"));
-        Image img = ii.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
-        ii = new ImageIcon(img);
-        lblImage.setIcon(ii);
+        intit();
     }
+
+    void intit() {
+        scrollTable.setVerticalScrollBar(new ScrollBar());
+        fillTable();
+        row = -1;
+        updateStatus();
+        clearForm();
+    }
+
+    void fillTable() {
+        DefaultTableModel model = (DefaultTableModel) tblChuyenDe.getModel();
+        model.setRowCount(0);
+        try {
+            String key = txtFind.getText();
+            List<ChuyenDe> list = dao.selectByKeyword(key);
+            for (ChuyenDe cd : list) {
+                Object[] row = {cd.getMaCD(), cd.getTenCD(), cd.getHocPhi(), cd.getThoiLuong()};
+                model.addRow(row);
+            }
+        } catch (Exception e) {
+            MsgBox.alert(this, "Lỗi truy vấn dữ liệu.");
+        }
+    }
+
+    void edit() {
+        String maCD = (String) tblChuyenDe.getValueAt(row, 0);
+        ChuyenDe cd = dao.selectById(maCD);
+        this.setForm(cd);
+        this.updateStatus();
+    }
+
+    void updateStatus() {
+        boolean edit = (this.row >= 0);
+        btnXoa.setEnabled(edit);
+        btnCapNhat.setEnabled(edit);
+        btnLuu.setEnabled(!edit);
+        txtMaCD.setEnabled(false);
+        boolean first = (this.row==0);
+        boolean last = (this.row==tblChuyenDe.getRowCount()-1);
+        btnFisrt.setEnabled(!first);
+        btnPrev.setEnabled(!first);
+        btnLast.setEnabled(!last);
+        btnNext.setEnabled(!last);
+    }
+
+    ChuyenDe getForm() {
+        ChuyenDe cd = new ChuyenDe();
+        cd.setMaCD(txtMaCD.getText());
+        cd.setTenCD(txtTenCD.getText());
+        cd.setHocPhi(Double.valueOf(txtHocPhi.getText()));
+        cd.setThoiLuong(Integer.parseInt(txtThoiLuong.getText()));
+        cd.setMoTa(txtMoTa.getText());
+        cd.setHinh(lblImage.getToolTipText());
+        return cd;
+    }
+
+    void setForm(ChuyenDe cd) {
+        txtMaCD.setText(cd.getMaCD());
+        txtTenCD.setText(cd.getTenCD());
+        txtHocPhi.setText(String.valueOf(cd.getHocPhi()));
+        txtThoiLuong.setText(String.valueOf(cd.getThoiLuong()));
+        txtMoTa.setText(cd.getMaCD());
+        if (cd.getHinh() != null) {
+            lblImage.setToolTipText(cd.getHinh());
+            ImageIcon icon = XImage.readImageChuyenDe(cd.getHinh());
+            Image img = icon.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
+            icon = new ImageIcon(img);
+            lblImage.setIcon(icon);
+        }
+    }
+
+    void clearForm() {
+        ChuyenDe cd = new ChuyenDe();
+        cd.setHinh("no-image.png");
+        this.setForm(cd);
+        this.row = -1;
+        this.updateStatus();
+        txtMaCD.setEnabled(true);
+    }
+
+    void insert() {
+        ChuyenDe cd = getForm();
+        try {
+            dao.insert(cd);
+            fillTable();
+            clearForm();
+            MsgBox.alert(this, "Thêm mới thành công.");
+        } catch (Exception e) {
+            MsgBox.alert(this, "Thêm mới thất bại.");
+        }
+    }
+
+    void update() {
+        ChuyenDe cd = getForm();
+        try {
+            dao.update(cd);
+            fillTable();
+            setForm(cd);
+            MsgBox.alert(this, "Cập nhật thành công.");
+        } catch (Exception e) {
+            MsgBox.alert(this, "Cập nhật thất bại.");
+        }
+    }
+
+    void delete() {
+        if (MsgBox.confirm(this, "Bạn thực sự muốn xoá nhân viên này.")) {
+            String maCD = txtMaCD.getText();
+            try {
+                dao.delete(maCD);
+                fillTable();
+                clearForm();
+                MsgBox.alert(this, "Xoá thành công.");
+            } catch (Exception e) {
+                MsgBox.alert(this, "Xoá thất bại.");
+            }
+        }
+    }
+
+    void first() {
+        row = 0;
+        edit();
+        
+    }
+
+    void next() {
+        if (row < tblChuyenDe.getRowCount() - 1) {
+            row++;
+            edit();
+        }
+    }
+
+    void prev() {
+        if (row > 0) {
+            row--;
+            edit();
+        }
+    }
+
+    void last() {
+        row = tblChuyenDe.getRowCount() - 1;
+        edit();
+    }
+
+    void tabDSSelected(boolean bln) {
+        if (bln) {
+            DanhSach.setBackground(new Color(60, 94, 150));
+            CapNhat.setBackground(new Color(63, 113, 194));
+            TabDanhSachPanel.setVisible(true);
+            TabCapNhatPanel.setVisible(false);
+        } else {
+            CapNhat.setBackground(new Color(60, 94, 150));
+            DanhSach.setBackground(new Color(63, 113, 194));
+            TabCapNhatPanel.setVisible(true);
+            TabDanhSachPanel.setVisible(false);
+        }
+    }
+
+    void chonAnh() {
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            XImage.saveImageChuyenDe(file);
+            ImageIcon icon = XImage.readImageChuyenDe(file.getName());
+            Image img = icon.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
+            icon = new ImageIcon(img);
+            lblImage.setIcon(icon);
+            lblImage.setToolTipText(file.getName());
+        }
+    }
+    
+    void timKiem(){
+        fillTable();
+        clearForm();
+        row = -1;
+        updateStatus();
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        fileChooser = new javax.swing.JFileChooser();
         panelBorder1 = new GUI.Swing.PanelBorder();
         TabBarPanel = new javax.swing.JPanel();
         DanhSach = new javax.swing.JPanel();
@@ -52,6 +232,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnThem = new javax.swing.JButton();
         btnLuu = new javax.swing.JButton();
         btnXoa = new javax.swing.JButton();
+        btnCapNhat = new javax.swing.JButton();
         MovingBtnPanel = new javax.swing.JPanel();
         btnFisrt = new javax.swing.JButton();
         btnPrev = new javax.swing.JButton();
@@ -148,19 +329,38 @@ public class QuanLyChuyenDe_Form extends JPanel {
             new String [] {
                 "Mã chuyên đề", "Tên chuyên đề", "Học phí", "Thời lượng"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tblChuyenDe.setFont(new java.awt.Font("Tahoma", 0, 16)); // NOI18N
+        tblChuyenDe.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblChuyenDeMouseClicked(evt);
+            }
+        });
         scrollTable.setViewportView(tblChuyenDe);
 
         SearchBarPanel.setBackground(new java.awt.Color(255, 255, 255));
 
         lblSearchIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/search.png"))); // NOI18N
+        lblSearchIcon.setToolTipText("Tìm theo mã chuyên đề.");
         lblSearchIcon.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        lblSearchIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblSearchIconMouseClicked(evt);
+            }
+        });
 
-        txtFind.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtFind.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtFind.setForeground(new java.awt.Color(102, 102, 102));
         txtFind.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtFind.setText("Type here..");
+        txtFind.setToolTipText("Tìm theo mã chuyên đề.");
         txtFind.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         javax.swing.GroupLayout SearchBarPanelLayout = new javax.swing.GroupLayout(SearchBarPanel);
@@ -170,7 +370,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SearchBarPanelLayout.createSequentialGroup()
                 .addComponent(lblSearchIcon)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFind, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+                .addComponent(txtFind)
                 .addGap(49, 49, 49))
         );
         SearchBarPanelLayout.setVerticalGroup(
@@ -190,10 +390,11 @@ public class QuanLyChuyenDe_Form extends JPanel {
                 .addGap(10, 10, 10)
                 .addGroup(TabDanhSachPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(TabDanhSachPanelLayout.createSequentialGroup()
+                        .addComponent(scrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 960, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(30, Short.MAX_VALUE))
+                    .addGroup(TabDanhSachPanelLayout.createSequentialGroup()
                         .addComponent(SearchBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(517, 517, 517))
-                    .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1007, Short.MAX_VALUE))
-                .addGap(9, 9, 9))
+                        .addGap(526, 526, 526))))
         );
         TabDanhSachPanelLayout.setVerticalGroup(
             TabDanhSachPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,7 +402,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
                 .addGap(50, 50, 50)
                 .addComponent(SearchBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
-                .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 535, Short.MAX_VALUE)
+                .addComponent(scrollTable)
                 .addGap(89, 89, 89))
         );
 
@@ -213,26 +414,23 @@ public class QuanLyChuyenDe_Form extends JPanel {
         lblMaCD.setForeground(new java.awt.Color(102, 102, 102));
         lblMaCD.setText("MÃ CHUYÊN ĐỀ:");
 
-        txtMaCD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtMaCD.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtMaCD.setForeground(new java.awt.Color(102, 102, 102));
         txtMaCD.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtMaCD.setText("Type here..");
         txtMaCD.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblTenCD.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
         lblTenCD.setForeground(new java.awt.Color(102, 102, 102));
         lblTenCD.setText("TÊN CHUYÊN ĐỀ:");
 
-        txtTenCD.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtTenCD.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtTenCD.setForeground(new java.awt.Color(102, 102, 102));
         txtTenCD.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtTenCD.setText("Type here..");
         txtTenCD.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        txtThoiLuong.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtThoiLuong.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtThoiLuong.setForeground(new java.awt.Color(102, 102, 102));
         txtThoiLuong.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtThoiLuong.setText("Type here..");
         txtThoiLuong.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblThoiLuong.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
@@ -243,10 +441,9 @@ public class QuanLyChuyenDe_Form extends JPanel {
         lblHocPhi.setForeground(new java.awt.Color(102, 102, 102));
         lblHocPhi.setText("HỌC PHÍ:");
 
-        txtHocPhi.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtHocPhi.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtHocPhi.setForeground(new java.awt.Color(102, 102, 102));
         txtHocPhi.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtHocPhi.setText("Type here..");
         txtHocPhi.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblMota.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
@@ -254,7 +451,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
         lblMota.setText("MÔ TẢ CHUYÊN ĐỀ:");
 
         txtMoTa.setColumns(20);
-        txtMoTa.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txtMoTa.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         txtMoTa.setRows(5);
         txtMoTa.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         txtMoTa.setMaximumSize(new java.awt.Dimension(244, 89));
@@ -265,35 +462,62 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnThem.setForeground(new java.awt.Color(102, 102, 102));
         btnThem.setText("Thêm mới");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
 
         btnLuu.setBackground(new java.awt.Color(255, 255, 255));
         btnLuu.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnLuu.setForeground(new java.awt.Color(102, 102, 102));
         btnLuu.setText("Lưu");
+        btnLuu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLuuActionPerformed(evt);
+            }
+        });
 
         btnXoa.setBackground(new java.awt.Color(255, 255, 255));
         btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnXoa.setForeground(new java.awt.Color(102, 102, 102));
         btnXoa.setText("Xoá");
+        btnXoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoaActionPerformed(evt);
+            }
+        });
+
+        btnCapNhat.setBackground(new java.awt.Color(255, 255, 255));
+        btnCapNhat.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnCapNhat.setForeground(new java.awt.Color(102, 102, 102));
+        btnCapNhat.setText("Cập nhật");
+        btnCapNhat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCapNhatActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout BasicToolPanelLayout = new javax.swing.GroupLayout(BasicToolPanel);
         BasicToolPanel.setLayout(BasicToolPanelLayout);
         BasicToolPanelLayout.setHorizontalGroup(
             BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(BasicToolPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(btnThem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnLuu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnThem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(70, 70, 70))
+                .addComponent(btnLuu, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnCapNhat, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnXoa, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         BasicToolPanelLayout.setVerticalGroup(
             BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnLuu, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-            .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnThem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnLuu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnCapNhat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         MovingBtnPanel.setBackground(new java.awt.Color(255, 255, 255));
@@ -302,28 +526,48 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnFisrt.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnFisrt.setForeground(new java.awt.Color(102, 102, 102));
         btnFisrt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/first.png"))); // NOI18N
+        btnFisrt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFisrtActionPerformed(evt);
+            }
+        });
 
         btnPrev.setBackground(new java.awt.Color(255, 255, 255));
         btnPrev.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnPrev.setForeground(new java.awt.Color(102, 102, 102));
         btnPrev.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/prev.png"))); // NOI18N
+        btnPrev.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrevActionPerformed(evt);
+            }
+        });
 
         btnNext.setBackground(new java.awt.Color(255, 255, 255));
         btnNext.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnNext.setForeground(new java.awt.Color(102, 102, 102));
         btnNext.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/next.png"))); // NOI18N
+        btnNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextActionPerformed(evt);
+            }
+        });
 
         btnLast.setBackground(new java.awt.Color(255, 255, 255));
         btnLast.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnLast.setForeground(new java.awt.Color(102, 102, 102));
         btnLast.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/last.png"))); // NOI18N
+        btnLast.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLastActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout MovingBtnPanelLayout = new javax.swing.GroupLayout(MovingBtnPanel);
         MovingBtnPanel.setLayout(MovingBtnPanelLayout);
         MovingBtnPanelLayout.setHorizontalGroup(
             MovingBtnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(MovingBtnPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(23, Short.MAX_VALUE)
                 .addComponent(btnFisrt)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrev)
@@ -345,53 +589,57 @@ public class QuanLyChuyenDe_Form extends JPanel {
         lblImage.setMaximumSize(new java.awt.Dimension(329, 352));
         lblImage.setMinimumSize(new java.awt.Dimension(24, 14));
         lblImage.setPreferredSize(new java.awt.Dimension(329, 352));
+        lblImage.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblImageMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout TabCapNhatPanelLayout = new javax.swing.GroupLayout(TabCapNhatPanel);
         TabCapNhatPanel.setLayout(TabCapNhatPanelLayout);
         TabCapNhatPanelLayout.setHorizontalGroup(
             TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                .addGap(98, 98, 98)
-                .addComponent(lblImage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(51, 51, 51)
+                .addGap(87, 87, 87)
+                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                        .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(MovingBtnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMoTa, javax.swing.GroupLayout.PREFERRED_SIZE, 801, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                .addGap(60, 60, 60)
                 .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                        .addComponent(lblMota, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 600, Short.MAX_VALUE))
+                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                        .addComponent(lblImage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(62, 62, 62)
                         .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                                .addComponent(lblMaCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(86, 86, 86))
-                            .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                                .addComponent(lblTenCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(59, 59, 59))
-                            .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                                .addComponent(lblThoiLuong, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(17, 17, 17))
-                            .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                                .addComponent(lblHocPhi, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(76, 76, 76)))
-                        .addGap(180, 180, 180))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabCapNhatPanelLayout.createSequentialGroup()
-                        .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtMaCD, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtTenCD, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtThoiLuong, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtHocPhi))
-                        .addGap(149, 149, 149))))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabCapNhatPanelLayout.createSequentialGroup()
-                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
-                        .addGap(158, 158, 158)
-                        .addComponent(BasicToolPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(88, 88, 88)
-                        .addComponent(MovingBtnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, TabCapNhatPanelLayout.createSequentialGroup()
-                        .addGap(98, 98, 98)
-                        .addComponent(lblMota, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE)
-                        .addGap(570, 570, 570))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, TabCapNhatPanelLayout.createSequentialGroup()
-                        .addGap(158, 158, 158)
-                        .addComponent(txtMoTa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGap(149, 149, 149))
+                                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                                        .addComponent(lblMaCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(86, 86, 86))
+                                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                                        .addComponent(lblTenCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(59, 59, 59))
+                                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                                        .addComponent(lblThoiLuong, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(17, 17, 17))
+                                    .addGroup(TabCapNhatPanelLayout.createSequentialGroup()
+                                        .addComponent(lblHocPhi, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(76, 76, 76)))
+                                .addGap(180, 180, 180))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabCapNhatPanelLayout.createSequentialGroup()
+                                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtMaCD, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtTenCD, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtThoiLuong, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtHocPhi))
+                                .addGap(149, 149, 149))))))
         );
         TabCapNhatPanelLayout.setVerticalGroup(
             TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -417,12 +665,12 @@ public class QuanLyChuyenDe_Form extends JPanel {
                         .addComponent(txtHocPhi, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(30, 30, 30)
                 .addComponent(lblMota, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(1, 1, 1)
                 .addComponent(txtMoTa, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(MovingBtnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(TabCapNhatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(MovingBtnPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(BasicToolPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(20, 20, 20))
         );
 
@@ -433,24 +681,23 @@ public class QuanLyChuyenDe_Form extends JPanel {
         panelBorder1Layout.setHorizontalGroup(
             panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(TabBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(TabMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(panelBorder1Layout.createSequentialGroup()
+                .addComponent(TabMainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 1000, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         panelBorder1Layout.setVerticalGroup(
             panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelBorder1Layout.createSequentialGroup()
                 .addComponent(TabBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(TabMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 758, Short.MAX_VALUE))
+                .addComponent(TabMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(0, 0, 0)
-                .addComponent(panelBorder1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+            .addComponent(panelBorder1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -462,18 +709,62 @@ public class QuanLyChuyenDe_Form extends JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void DanhSachMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DanhSachMouseClicked
-        DanhSach.setBackground(new Color(60,94,150));
-        CapNhat.setBackground(new Color(63,113,194));
-        TabDanhSachPanel.setVisible(true);
-        TabCapNhatPanel.setVisible(false);
+        tabDSSelected(true);
     }//GEN-LAST:event_DanhSachMouseClicked
 
     private void CapNhatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CapNhatMouseClicked
-        CapNhat.setBackground(new Color(60,94,150));
-        DanhSach.setBackground(new Color(63,113,194));
-        TabCapNhatPanel.setVisible(true);
-        TabDanhSachPanel.setVisible(false);
+        tabDSSelected(false);
     }//GEN-LAST:event_CapNhatMouseClicked
+
+    private void tblChuyenDeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblChuyenDeMouseClicked
+        if (evt.getClickCount() == 2) {
+            this.row = tblChuyenDe.getSelectedRow();
+            this.edit();
+            tabDSSelected(false);
+        }
+    }//GEN-LAST:event_tblChuyenDeMouseClicked
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        clearForm();
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private void btnLuuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLuuActionPerformed
+        insert();
+    }//GEN-LAST:event_btnLuuActionPerformed
+
+    private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
+        delete();
+    }//GEN-LAST:event_btnXoaActionPerformed
+
+    private void btnCapNhatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCapNhatActionPerformed
+        update();
+    }//GEN-LAST:event_btnCapNhatActionPerformed
+
+    private void lblImageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblImageMouseClicked
+        if (evt.getClickCount() == 2) {
+            chonAnh();
+        }
+    }//GEN-LAST:event_lblImageMouseClicked
+
+    private void btnFisrtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFisrtActionPerformed
+        first();
+    }//GEN-LAST:event_btnFisrtActionPerformed
+
+    private void btnPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrevActionPerformed
+        prev();
+    }//GEN-LAST:event_btnPrevActionPerformed
+
+    private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        next();
+    }//GEN-LAST:event_btnNextActionPerformed
+
+    private void btnLastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLastActionPerformed
+        last();
+    }//GEN-LAST:event_btnLastActionPerformed
+
+    private void lblSearchIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchIconMouseClicked
+        timKiem();
+    }//GEN-LAST:event_lblSearchIconMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -486,6 +777,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
     private GUI.Swing.PanelBorder TabCapNhatPanel;
     private GUI.Swing.PanelBorder TabDanhSachPanel;
     private GUI.Swing.PanelBorder TabMainPanel;
+    private javax.swing.JButton btnCapNhat;
     private javax.swing.JButton btnFisrt;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnLuu;
@@ -493,6 +785,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
     private javax.swing.JButton btnPrev;
     private javax.swing.JButton btnThem;
     private javax.swing.JButton btnXoa;
+    private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel lblCapNhat;
     private javax.swing.JLabel lblDanhSach;
     private javax.swing.JLabel lblHocPhi;
