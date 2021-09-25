@@ -43,7 +43,7 @@ public class NguoiHocTheoNam_Form extends javax.swing.JPanel {
     
     BarChart createChart(){
         BarChart barChart = new BarChart();
-        barChart.addLegend("Lượng người học", Color.yellow);
+        barChart.addLegend("Lượng người học", new Color(135, 189,245));
         chartPanel.removeAll();
         chartPanel.add(barChart);
         chartPanel.repaint();

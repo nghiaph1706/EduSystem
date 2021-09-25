@@ -13,7 +13,7 @@ public class BarChart extends javax.swing.JPanel {
     
     private List<ModelLegend> legends =new ArrayList<>();
     private List<ModelChart> models = new ArrayList<>();
-    private final int seriesSize = 20;
+    private final int seriesSize = 40;
     private final int seriesSpace = 6;
     
     public BarChart() {

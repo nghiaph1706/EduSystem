@@ -8,10 +8,6 @@ public class Welcome_Form extends javax.swing.JPanel {
 
     public Welcome_Form() {
         initComponents();
-        ImageIcon ii = new ImageIcon(this.getClass().getResource("/GUI/Icon/Fatbee.png"));
-        Image img = ii.getImage().getScaledInstance(lblWelcomeImage.getPreferredSize().width, lblWelcomeImage.getPreferredSize().height, Image.SCALE_SMOOTH);
-        ii = new ImageIcon(img);
-        lblWelcomeImage.setIcon(ii);
     }
 
     @SuppressWarnings("unchecked")
@@ -23,6 +19,8 @@ public class Welcome_Form extends javax.swing.JPanel {
 
         panelBorder1.setBackground(new java.awt.Color(255, 255, 255));
 
+        lblWelcomeImage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblWelcomeImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/world.png"))); // NOI18N
         lblWelcomeImage.setMaximumSize(new java.awt.Dimension(1026, 785));
         lblWelcomeImage.setPreferredSize(new java.awt.Dimension(1026, 785));
 

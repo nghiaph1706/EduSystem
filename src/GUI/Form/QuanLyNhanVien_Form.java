@@ -38,7 +38,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         try {
             List<NhanVien> list = dao.selectAll();
             for (NhanVien nv : list) {
-                Object[] row = {nv.getMaNV(), nv.getHoTen(),stringToPass( nv.getMatKhau()), nv.getVaiTro() ? "Trưởng phòng" : "Nhân viên"};
+                Object[] row = {nv.getMaNV(), nv.getHoTen(),nv.getEmail(),stringToPass( nv.getMatKhau()), nv.getVaiTro() ? "Trưởng phòng" : "Nhân viên"};
                 model.addRow(row);
             }
         } catch (Exception e) {
@@ -67,6 +67,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         nv.setHoTen(txtHoTen.getText());
         nv.setMatKhau(pwdMatKhau.getText());
         nv.setVaiTro(rdoTruongPhong.isSelected());
+        nv.setEmail(txtEmail.getText());
         nv.setHinh(lblImage.getToolTipText());
         return nv;
     }
@@ -74,6 +75,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
     void setForm(NhanVien nv) {
         txtMaNV.setText(nv.getMaNV());
         txtHoTen.setText(nv.getHoTen());
+        txtEmail.setText(nv.getEmail());
         pwdMatKhau.setText(nv.getMatKhau());
         pwdXacNhan.setText(nv.getMatKhau());
         rdoNhanVien.setSelected(!nv.getVaiTro());
@@ -192,6 +194,8 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         pwdMatKhau = new javax.swing.JPasswordField();
         lblXacNhan = new javax.swing.JLabel();
         pwdXacNhan = new javax.swing.JPasswordField();
+        lblEmail = new javax.swing.JLabel();
+        txtEmail = new javax.swing.JTextField();
 
         setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
         setPreferredSize(new java.awt.Dimension(1026, 785));
@@ -216,11 +220,11 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Mã nhân viên", "Họ và tên", "Mật khẩu", "Vai trò"
+                "Mã nhân viên", "Họ và tên", "Email", "Mật khẩu", "Vai trò"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -358,6 +362,16 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         pwdXacNhan.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         pwdXacNhan.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        lblEmail.setFont(new java.awt.Font("Tahoma", 3, 16)); // NOI18N
+        lblEmail.setForeground(new java.awt.Color(102, 102, 102));
+        lblEmail.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblEmail.setText("Email:");
+
+        txtEmail.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+        txtEmail.setForeground(new java.awt.Color(102, 102, 102));
+        txtEmail.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtEmail.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
         javax.swing.GroupLayout panelBorder1Layout = new javax.swing.GroupLayout(panelBorder1);
         panelBorder1.setLayout(panelBorder1Layout);
         panelBorder1Layout.setHorizontalGroup(
@@ -376,7 +390,8 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                             .addComponent(lblHoTen)
                             .addComponent(lblVaitro)
                             .addComponent(lblMatKhau)
-                            .addComponent(lblXacNhan))
+                            .addComponent(lblXacNhan)
+                            .addComponent(lblEmail))
                         .addGap(48, 48, 48))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -385,10 +400,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                 .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelBorder1Layout.createSequentialGroup()
                         .addComponent(pwdXacNhan)
-                        .addGap(180, 180, 180))
-                    .addGroup(panelBorder1Layout.createSequentialGroup()
-                        .addComponent(pwdMatKhau)
-                        .addGap(180, 180, 180))
+                        .addGap(172, 172, 172))
                     .addGroup(panelBorder1Layout.createSequentialGroup()
                         .addComponent(rdoTruongPhong)
                         .addGap(18, 18, 18)
@@ -396,8 +408,10 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                         .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(pwdMatKhau, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtHoTen, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtMaNV))
+                            .addComponent(txtMaNV)
+                            .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.LEADING))
                         .addGap(171, 171, 171))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -418,6 +432,10 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                         .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtHoTen, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblHoTen))
+                        .addGap(13, 13, 13)
+                        .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblEmail)
+                            .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lblVaitro)
@@ -431,11 +449,11 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                         .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lblXacNhan)
                             .addComponent(pwdXacNhan, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45)
+                .addGap(18, 18, 18)
                 .addComponent(scrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(43, 43, 43))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -492,6 +510,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
     private javax.swing.JButton btnXoa;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JFileChooser fileChooser;
+    private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblHoTen;
     private javax.swing.JLabel lblImage;
     private javax.swing.JLabel lblMaNV;
@@ -505,6 +524,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
     private javax.swing.JRadioButton rdoTruongPhong;
     private javax.swing.JScrollPane scrollTable;
     private GUI.Swing.Table tblNhanvien;
+    private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtHoTen;
     private javax.swing.JTextField txtMaNV;
     // End of variables declaration//GEN-END:variables

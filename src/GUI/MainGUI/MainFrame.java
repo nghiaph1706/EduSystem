@@ -18,7 +18,6 @@ public class MainFrame extends javax.swing.JFrame {
         menu.addEventMenuSelected(new IEventMenuSelected() {
             @Override
             public void selected(int index) {
-                System.out.println(index);
                 if (index == 1) {
                     setForm(new QuanLyNguoiHoc_Form());
                     lblChucNang.setText("QUẢN LÝ NGƯỜI HỌC");

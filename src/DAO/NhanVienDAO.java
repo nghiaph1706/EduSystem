@@ -9,20 +9,20 @@ import java.util.List;
 
 public class NhanVienDAO extends EduSystemDAO<NhanVien, String>{
     
-    String  INSERT_SQL = "INSERT INTO NhanVien(MaNV , MatKhau , HoTen , VaiTro , Hinh) VALUES (?,?,?,?,?)";
-    String  UPDATE_SQL = "UPDATE NhanVien SET MatKhau=?,HoTen=?,VaiTro=?,Hinh=? WHERE MaNV=?";
+    String  INSERT_SQL = "INSERT INTO NhanVien(MaNV , MatKhau , HoTen , VaiTro ,Email, Hinh) VALUES (?,?,?,?,?,?)";
+    String  UPDATE_SQL = "UPDATE NhanVien SET MatKhau=?,HoTen=?,VaiTro=?,Email=?,Hinh=? WHERE MaNV=?";
     String  DELETE_SQL = "DELETE FROM NhanVien WHERE MaNV=?";
     String  SELECT_ALL_SQL = "SELECT * FROM NhanVien";
     String  SELECT_BY_ID_SQL = "SELECT * FROM NhanVien WHERE MaNV=?";
     
     @Override
     public void insert(NhanVien enity) {
-        JdbcHelper.update(INSERT_SQL, enity.getMaNV(),enity.getMatKhau(),enity.getHoTen(),enity.getVaiTro(),enity.getHinh());
+        JdbcHelper.update(INSERT_SQL, enity.getMaNV(),enity.getMatKhau(),enity.getHoTen(),enity.getVaiTro(),enity.getEmail(),enity.getHinh());
     }
 
     @Override
     public void update(NhanVien enity) {
-        JdbcHelper.update(UPDATE_SQL, enity.getMatKhau(),enity.getHoTen(),enity.getVaiTro(),enity.getHinh(),enity.getMaNV());
+        JdbcHelper.update(UPDATE_SQL, enity.getMatKhau(),enity.getHoTen(),enity.getVaiTro(),enity.getEmail(),enity.getHinh(),enity.getMaNV());
     }
 
     @Override
@@ -55,6 +55,7 @@ public class NhanVienDAO extends EduSystemDAO<NhanVien, String>{
                 entity.setMatKhau(rs.getString("MatKhau"));
                 entity.setHoTen(rs.getString("HoTen"));
                 entity.setVaiTro(rs.getBoolean("VaiTro"));
+                entity.setEmail(rs.getString("Email"));
                 entity.setHinh(rs.getString("Hinh"));
                 list.add(entity);
             }

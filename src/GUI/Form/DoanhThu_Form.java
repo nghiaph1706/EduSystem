@@ -46,7 +46,7 @@ public class DoanhThu_Form extends javax.swing.JPanel {
             String tenCD = (String) row[0];
             int slhv = (int) row[2];
             double dt = (double) row[3];
-            double hptb = (double) row[6];
+            double hptb = Double.parseDouble(String.valueOf(row[6]));
             model.addRow(row);
             fillDataChart(tenCD, slhv, dt, hptb);
         }
@@ -58,9 +58,9 @@ public class DoanhThu_Form extends javax.swing.JPanel {
     
     BarChart createChart(){
         BarChart barChart = new BarChart();
-        barChart.addLegend("Số lượng học viên", Color.yellow);
-        barChart.addLegend("Doanh thu", Color.pink);
-        barChart.addLegend("Học phí trung bình", Color.blue);
+        barChart.addLegend("Số lượng học viên", new Color(245, 189,135));
+        barChart.addLegend("Doanh thu", new Color(135, 189,245));
+        barChart.addLegend("Học phí trung bình", new Color(189, 135,245));
         chartPanel.removeAll();
         chartPanel.add(barChart);
         chartPanel.repaint();

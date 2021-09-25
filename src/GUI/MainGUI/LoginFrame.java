@@ -5,8 +5,10 @@ import DAO.NhanVienDAO;
 import Model.NhanVien;
 import Utilities.Auth;
 import Utilities.MsgBox;
+import java.awt.Color;
 import java.awt.Image;
 import javax.swing.ImageIcon;
+
 
 public class LoginFrame extends javax.swing.JFrame {
     
@@ -14,6 +16,11 @@ public class LoginFrame extends javax.swing.JFrame {
     
     public LoginFrame() {
         initComponents();
+        setBackground(new Color(0,0,0,0));
+        intit();
+    }
+    
+    void intit(){
         setLocationRelativeTo(this);
         ImageIcon ii = new ImageIcon(this.getClass().getResource("/GUI/Icon/logoFPT.png"));
         Image img = ii.getImage().getScaledInstance(lblLogoFPT.getWidth(), lblLogoFPT.getHeight(), Image.SCALE_SMOOTH);
@@ -34,6 +41,11 @@ public class LoginFrame extends javax.swing.JFrame {
         }
     }
     
+    void quenMatKhau(){
+        new ForgotPasswordFrame().setVisible(true);
+        dispose();
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -50,6 +62,7 @@ public class LoginFrame extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JSeparator();
         pwdPass = new javax.swing.JPasswordField();
         btnDangNhap = new javax.swing.JButton();
+        lblQuenMK = new javax.swing.JLabel();
 
         lblKhoaHoc.setFont(new java.awt.Font("Tahoma", 3, 30)); // NOI18N
         lblKhoaHoc.setForeground(new java.awt.Color(210, 210, 210));
@@ -110,14 +123,27 @@ public class LoginFrame extends javax.swing.JFrame {
             }
         });
 
+        lblQuenMK.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        lblQuenMK.setForeground(new java.awt.Color(153, 153, 153));
+        lblQuenMK.setText("Quên mật khẩu ?");
+        lblQuenMK.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                lblQuenMKMouseMoved(evt);
+            }
+        });
+        lblQuenMK.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblQuenMKMouseClicked(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                lblQuenMKMouseExited(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelBorderGradient2Layout = new javax.swing.GroupLayout(panelBorderGradient2);
         panelBorderGradient2.setLayout(panelBorderGradient2Layout);
         panelBorderGradient2Layout.setHorizontalGroup(
             panelBorderGradient2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorderGradient2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblClose)
-                .addContainerGap())
             .addGroup(panelBorderGradient2Layout.createSequentialGroup()
                 .addGap(46, 46, 46)
                 .addGroup(panelBorderGradient2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -134,8 +160,16 @@ public class LoginFrame extends javax.swing.JFrame {
                         .addGap(26, 26, 26))
                     .addGroup(panelBorderGradient2Layout.createSequentialGroup()
                         .addGap(74, 74, 74)
-                        .addComponent(btnDangNhap, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(97, Short.MAX_VALUE))))
+                        .addGroup(panelBorderGradient2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnDangNhap, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(panelBorderGradient2Layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addComponent(lblQuenMK, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(104, Short.MAX_VALUE))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorderGradient2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblClose)
+                .addContainerGap())
         );
         panelBorderGradient2Layout.setVerticalGroup(
             panelBorderGradient2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -154,7 +188,9 @@ public class LoginFrame extends javax.swing.JFrame {
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnDangNhap, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(167, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(lblQuenMK)
+                .addContainerGap(132, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout panelBorder1Layout = new javax.swing.GroupLayout(panelBorder1);
@@ -164,7 +200,7 @@ public class LoginFrame extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                 .addGap(43, 43, 43)
                 .addComponent(lblLogoFPT, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 63, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
                 .addComponent(panelBorderGradient2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         panelBorder1Layout.setVerticalGroup(
@@ -205,6 +241,18 @@ public class LoginFrame extends javax.swing.JFrame {
     private void btnDangNhapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDangNhapActionPerformed
         dangNhap(txtUser.getText(), pwdPass.getText());
     }//GEN-LAST:event_btnDangNhapActionPerformed
+
+    private void lblQuenMKMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblQuenMKMouseMoved
+        lblQuenMK.setForeground(Color.white);
+    }//GEN-LAST:event_lblQuenMKMouseMoved
+
+    private void lblQuenMKMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblQuenMKMouseExited
+        lblQuenMK.setForeground(new Color(153,153,153));
+    }//GEN-LAST:event_lblQuenMKMouseExited
+
+    private void lblQuenMKMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblQuenMKMouseClicked
+        quenMatKhau();
+    }//GEN-LAST:event_lblQuenMKMouseClicked
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -247,6 +295,7 @@ public class LoginFrame extends javax.swing.JFrame {
     private javax.swing.JLabel lblIconUser;
     private javax.swing.JLabel lblKhoaHoc;
     private javax.swing.JLabel lblLogoFPT;
+    private javax.swing.JLabel lblQuenMK;
     private GUI.Swing.PanelBorder panelBorder1;
     private GUI.Swing.PanelBorderGradient panelBorderGradient2;
     private javax.swing.JPasswordField pwdPass;

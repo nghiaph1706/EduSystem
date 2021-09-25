@@ -90,7 +90,7 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
     
     BarChart createChart(){
         BarChart barChart = new BarChart();
-        barChart.addLegend("Điểm", Color.yellow);
+        barChart.addLegend("Điểm", new Color(135, 189,245));
         chartPanel.removeAll();
         chartPanel.add(barChart);
         chartPanel.repaint();
@@ -205,7 +205,7 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
                 .addGroup(TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(ThongKe, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(BangDiem, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
                 .addGroup(TabBarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblKhoaHoc)
                     .addComponent(cbxKhoaHoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -239,16 +239,16 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
         TabBangDiemPanelLayout.setHorizontalGroup(
             TabBangDiemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(TabBangDiemPanelLayout.createSequentialGroup()
-                .addGap(49, 49, 49)
+                .addGap(56, 56, 56)
                 .addComponent(scrollPane)
-                .addGap(56, 56, 56))
+                .addGap(49, 49, 49))
         );
         TabBangDiemPanelLayout.setVerticalGroup(
             TabBangDiemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabBangDiemPanelLayout.createSequentialGroup()
-                .addContainerGap(76, Short.MAX_VALUE)
+            .addGroup(TabBangDiemPanelLayout.createSequentialGroup()
+                .addGap(29, 29, 29)
                 .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(78, 78, 78))
+                .addContainerGap(125, Short.MAX_VALUE))
         );
 
         TabMainPanel.add(TabBangDiemPanel, "card2");

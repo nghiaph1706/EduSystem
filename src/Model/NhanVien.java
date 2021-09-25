@@ -6,24 +6,31 @@ public class NhanVien {
     private String matKhau;
     private String hoTen;
     private Boolean vaiTro =false;
+    private String Email;
     private String hinh;
 
     public NhanVien() {
     }
 
-    public NhanVien(String maNV, String matKhau, String hoTen, String hinh) {
+    public NhanVien(String maNV, String matKhau, String hoTen, String Email, String hinh) {
         this.maNV = maNV;
         this.matKhau = matKhau;
         this.hoTen = hoTen;
+        this.Email = Email;
         this.hinh = hinh;
     }
-
-    public String getHinh() {
-        return hinh;
+    
+    @Override
+    public String toString(){
+        return this.hoTen;
     }
 
-    public void setHinh(String hinh) {
-        this.hinh = hinh;
+    public String getEmail() {
+        return Email;
+    }
+
+    public void setEmail(String Email) {
+        this.Email = Email;
     }
 
     public String getMaNV() {
@@ -58,8 +65,11 @@ public class NhanVien {
         this.vaiTro = vaiTro;
     }
 
-    @Override
-    public String toString(){
-        return this.hoTen;
+    public String getHinh() {
+        return hinh;
+    }
+
+    public void setHinh(String hinh) {
+        this.hinh = hinh;
     }
 }

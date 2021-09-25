@@ -6,6 +6,7 @@ import GUI.Chart.BarChart.BarChart;
 import GUI.Chart.BarChart.ModelChart;
 import GUI.Swing.ScrollBar;
 import java.awt.Color;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
@@ -31,25 +32,23 @@ public class DiemTheoChuyenDe_Form extends javax.swing.JPanel {
         List<Object[]> list = tkdao.getDiemChuyenDe();
         for (Object[] row : list) {
             String tenCD = (String) row[0];
-            int slhv = (int) row[1];
             double dcn = (double) row[2];
             double dtn = (double) row[3];
-            double dtb = (double) row[4];
+            double dtb = Double.parseDouble(String.valueOf(row[4]));
             model.addRow(row);
-            fillDataChart(tenCD, slhv, dcn, dtn, dtb);
+            fillDataChart(tenCD, dcn, dtn, dtb);
         }
     }
     
-    void fillDataChart(String masv, double slhv, double dcn, double dtn, double dtb ){
-        barChart.addData(new ModelChart(masv, new double[]{slhv,dcn,dtn,dtb}));
+    void fillDataChart(String masv, double dcn, double dtn, double dtb ){
+        barChart.addData(new ModelChart(masv, new double[]{dcn,dtn,dtb}));
     }
     
     BarChart createChart(){
         BarChart barChart = new BarChart();
-        barChart.addLegend("Số lượng học viên", Color.yellow);
-        barChart.addLegend("Điểm thấp nhất", Color.pink);
-        barChart.addLegend("Điểm cao nhất", Color.blue);
-        barChart.addLegend("Điểm trung bình", Color.red);
+        barChart.addLegend("Điểm thấp nhất", new Color(245, 189,135));
+        barChart.addLegend("Điểm cao nhất", new Color(135, 189,245));
+        barChart.addLegend("Điểm trung bình", new Color(189, 135,245));
         chartPanel.removeAll();
         chartPanel.add(barChart);
         chartPanel.repaint();

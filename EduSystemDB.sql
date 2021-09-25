@@ -5,166 +5,166 @@ USE EduSystem
 GO
 
 CREATE TABLE NhanVien(
-MaNV nvarchar(50) NOT NULL,
-MatKhau nvarchar(50) NOT NULL,
-HoTen nvarchar(50) NOT NULL,
-VaiTro bit NOT NULL DEFAULT 0,
-Hinh nvarchar(50),
-PRIMARY KEY(MaNV)
+	MaNV nvarchar(50) NOT NULL,
+	MatKhau nvarchar(50) NOT NULL,
+	HoTen nvarchar(50) NOT NULL,
+	VaiTro bit NOT NULL DEFAULT 0,
+	Email varchar(50) NOT NULL,
+	Hinh nvarchar(50),
+	PRIMARY KEY(MaNV)
 )
 GO
 
 CREATE TABLE ChuyenDe(
-MaCD nvarchar(50) NOT NULL,
-TenCD nvarchar(50) NOT NULL,
-HocPhi float NOT NULL DEFAULT 0,
-ThoiLuong int NOT NULL DEFAULT 30,
-Hinh nvarchar(50),
-MoTa nvarchar(255) NOT NULL,
-PRIMARY KEY(MaCD),
-UNIQUE(TenCD),
-CHECK(HocPhi >= 0 AND ThoiLuong > 0)
+	MaCD nvarchar(50) NOT NULL,
+	TenCD nvarchar(50) NOT NULL,
+	HocPhi float NOT NULL DEFAULT 0,
+	ThoiLuong int NOT NULL DEFAULT 30,
+	Hinh nvarchar(50),
+	MoTa nvarchar(255) NOT NULL,
+	PRIMARY KEY(MaCD),
+	UNIQUE(TenCD),
+	CHECK(HocPhi >= 0 AND ThoiLuong > 0)
 )
 GO
 
 CREATE TABLE NguoiHoc(
-MaNH nvarchar(50) NOT NULL,
-HoTen nvarchar(50) NOT NULL,
-NgaySinh date NOT NULL,
-GioiTinh bit NOT NULL DEFAULT 0,
-DienThoai nvarchar(50) NOT NULL,
-Email nvarchar(50) NOT NULL,
-GhiChu nvarchar(max) NULL,
-MaNV nvarchar(50) NOT NULL,
-NgayDK date NOT NULL DEFAULT getdate(),
-PRIMARY KEY(MaNH),
-FOREIGN KEY(MaNV) REFERENCES NhanVien(MaNV) ON DELETE NO ACTION ON UPDATE CASCADE
+	MaNH nvarchar(50) NOT NULL,
+	HoTen nvarchar(50) NOT NULL,
+	NgaySinh date NOT NULL,
+	GioiTinh bit NOT NULL DEFAULT 0,
+	DienThoai nvarchar(50) NOT NULL,
+	Email nvarchar(50) NOT NULL,
+	GhiChu nvarchar(max) NULL,
+	MaNV nvarchar(50) NOT NULL,
+	NgayDK date NOT NULL DEFAULT getdate(),
+	PRIMARY KEY(MaNH),
+	FOREIGN KEY(MaNV) REFERENCES NhanVien(MaNV) ON DELETE NO ACTION ON UPDATE CASCADE
 )
 GO
 
 CREATE TABLE KhoaHoc(
-MaKH int IDENTITY(1,1) NOT NULL,
-MaCD nvarchar(50) NOT NULL,
-HocPhi float NOT NULL DEFAULT 0,
-ThoiLuong int NOT NULL DEFAULT 0,
-NgayKG date NOT NULL,
-GhiChu nvarchar(50) NULL,
-MaNV nvarchar(50) NOT NULL,
-NgayTao date NOT NULL DEFAULT getdate(),
-PRIMARY KEY(MaKH),
-CHECK(HocPhi >= 0 AND ThoiLuong > 0),
-FOREIGN KEY (MaCD) REFERENCES ChuyenDe(MaCD) ON DELETE NO ACTION ON UPDATE CASCADE,
-FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE NO ACTION ON UPDATE CASCADE
+	MaKH int IDENTITY(1,1) NOT NULL,
+	MaCD nvarchar(50) NOT NULL,
+	HocPhi float NOT NULL DEFAULT 0,
+	ThoiLuong int NOT NULL DEFAULT 0,
+	NgayKG date NOT NULL,
+	GhiChu nvarchar(50) NULL,
+	MaNV nvarchar(50) NOT NULL,
+	NgayTao date NOT NULL DEFAULT getdate(),
+	PRIMARY KEY(MaKH),
+	CHECK(HocPhi >= 0 AND ThoiLuong > 0),
+	FOREIGN KEY (MaCD) REFERENCES ChuyenDe(MaCD) ON DELETE NO ACTION ON UPDATE CASCADE,
+	FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE NO ACTION ON UPDATE CASCADE
 )
 GO
 
 CREATE TABLE HocVien(
-MaHV int IDENTITY(1,1) NOT NULL,
-MaKH int NOT NULL,
-MaNH nvarchar(50) NOT NULL,
-Diem float NOT NULL,
-PRIMARY KEY(MaHV),
-UNIQUE(MaKH, MaNH),
-FOREIGN KEY (MaKH) REFERENCES KhoaHoc(MaKH) ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (MaNH) REFERENCES NguoiHoc(MaNH) ON DELETE NO ACTION ON UPDATE NO ACTION
+	MaHV int IDENTITY(1,1) NOT NULL,
+	MaKH int NOT NULL,
+	MaNH nvarchar(50) NOT NULL,
+	Diem float NOT NULL,
+	PRIMARY KEY(MaHV),
+	UNIQUE(MaKH, MaNH),
+	FOREIGN KEY (MaKH) REFERENCES KhoaHoc(MaKH) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY (MaNH) REFERENCES NguoiHoc(MaNH) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 GO
 
 CREATE PROC sp_ThongKeNguoiHoc
-AS BEGIN
-SELECT
-YEAR(NgayDK) Nam,
-COUNT(*) SoLuong,
-MIN(NgayDK) DauTien,
-MAX(NgayDK) CuoiCung
-FROM NguoiHoc
-GROUP BY YEAR(NgayDK)
-END
+	AS BEGIN
+		SELECT
+		YEAR(NgayDK) Nam,
+		COUNT(*) SoLuong,
+		MIN(NgayDK) DauTien,
+		MAX(NgayDK) CuoiCung
+		FROM NguoiHoc
+		GROUP BY YEAR(NgayDK)
+	END
 GO
 
 CREATE PROC sp_ThongKeDoanhThu(@Year INT)
-AS BEGIN
-SELECT
-TenCD ChuyenDe,
-COUNT(DISTINCT kh.MaKH) SoKH,
-COUNT(hv.MaHV) SoHV,
-SUM(kh.HocPhi) DoanhThu,
-MIN(kh.HocPhi) ThapNhat,
-MAX(kh.HocPhi) CaoNhat,
-AVG(kh.HocPhi) TrungBinh
-FROM KhoaHoc kh
-JOIN HocVien hv ON kh.MaKH=hv.MaKH
-JOIN ChuyenDe cd ON cd.MaCD=kh.MaCD
-WHERE YEAR(NgayKG) = @Year
-GROUP BY TenCD
-END
+	AS BEGIN
+		SELECT
+		kh.MaCD ChuyenDe,
+		COUNT(DISTINCT kh.MaKH) SoKH,
+		COUNT(hv.MaHV) SoHV,
+		SUM(kh.HocPhi) DoanhThu,
+		MIN(kh.HocPhi) ThapNhat,
+		MAX(kh.HocPhi) CaoNhat,
+		CONVERT(DECIMAL(10,2),AVG(kh.HocPhi)) TrungBinh
+		FROM KhoaHoc kh
+		JOIN HocVien hv ON kh.MaKH=hv.MaKH
+		JOIN ChuyenDe cd ON cd.MaCD=kh.MaCD
+		WHERE YEAR(NgayKG) = @Year
+		GROUP BY kh.MaCD
+	END
 GO
 
 CREATE PROC sp_ThongKeDiem
-AS BEGIN
-SELECT
-TenCD ChuyenDe,
-COUNT(MaHV) SoHV,
-MIN(Diem) ThapNhat,
-MAX(Diem) CaoNhat,
-AVG(Diem) TrungBinh
-FROM KhoaHoc kh
-JOIN HocVien hv ON kh.MaKH=hv.MaKH
-JOIN ChuyenDe cd ON cd.MaCD=kh.MaCD
-GROUP BY TenCD
-END
+	AS BEGIN
+		SELECT
+		cd.MaCD ChuyenDe,
+		COUNT(MaHV) SoHV,
+		MIN(Diem) ThapNhat,
+		MAX(Diem) CaoNhat,
+		CONVERT(DECIMAL(10,2),AVG(Diem)) TrungBinh
+		FROM KhoaHoc kh
+		JOIN HocVien hv ON kh.MaKH=hv.MaKH
+		JOIN ChuyenDe cd ON cd.MaCD=kh.MaCD
+		GROUP BY cd.MaCD
+	END
 GO
 
 CREATE PROC sp_BangDiem(@MaKH INT)
-AS BEGIN
-SELECT
-nh.MaNH,
-nh.HoTen,
-hv.Diem
-FROM HocVien hv
-JOIN NguoiHoc nh ON nh.MaNH=hv.MaNH
-WHERE hv.MaKH = @MaKH
-ORDER BY hv.Diem DESC
-END
+	AS BEGIN
+		SELECT
+		nh.MaNH,
+		nh.HoTen,
+		hv.Diem
+		FROM HocVien hv
+		JOIN NguoiHoc nh ON nh.MaNH=hv.MaNH
+		WHERE hv.MaKH = @MaKH
+		ORDER BY hv.Diem DESC
+	END
 GO
 
 
 
 
-INSERT [dbo].[NhanVien] ([MaNV], [MatKhau], [HoTen], [VaiTro],[Hinh]) VALUES (N'NoPT', N'123456', N'Phạm Thị Nở', 0,'nopt.png')
-INSERT [dbo].[NhanVien] ([MaNV], [MatKhau], [HoTen], [VaiTro],[Hinh]) VALUES (N'PheoNC', N'123456', N'Nguyễn Chí Phèo', 0,'pheonc.png')
-INSERT [dbo].[NhanVien] ([MaNV], [MatKhau], [HoTen], [VaiTro],[Hinh]) VALUES (N'TeoNV', N'123456', N'Nguyễn Văn Tèo', 1,'teonv.png')
+INSERT [dbo].[NhanVien] ([MaNV], [MatKhau], [HoTen], [VaiTro], [Email],[Hinh]) VALUES (N'NoPT', N'123456', N'Phạm Thị Nở', 0,'nghiapls17855@fpt.edu.vn','nopt.png')
+INSERT [dbo].[NhanVien] ([MaNV], [MatKhau], [HoTen], [VaiTro], [Email],[Hinh]) VALUES (N'PheoNC', N'123456', N'Nguyễn Chí Phèo', 0,'nghiapls17855@fpt.edu.vn','pheonc.jpg')
+INSERT [dbo].[NhanVien] ([MaNV], [MatKhau], [HoTen], [VaiTro], [Email],[Hinh]) VALUES (N'TeoNV', N'123456', N'Nguyễn Văn Tèo', 1,'nghiapls17855@fpt.edu.vn','teonv.png')
 
 
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV01', N'Lập trình Java cơ bản', 300, 90, N'GAME.png', N'JAV01 - Lập trình Java cơ bản')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV02', N'Lập trình Java nâng cao', 300, 90, N'HTCS.jpg', N'JAV02 - Lập trình Java nâng cao')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV03', N'Lập trình mạng với Java', 200, 70, N'INMA.jpg', N'JAV03 - Lập trình mạng với Java')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV04', N'Lập trình desktop với Swing', 200, 70, N'LAYO.jpg', N'JAV04 - Lập trình desktop với Swing')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO01', N'Dự án với công nghệ MS.NET MVC', 300, 90, N'MOWE.png', N'PRO01 - Dự án với công nghệ MS.NET MVC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO02', N'Dự án với công nghệ Spring MVC', 300, 90, N'Subject.png', N'PRO02 - Dự án với công nghệ Spring MVC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO03', N'Dự án với công nghệ Servlet/JSP', 300, 90, N'GAME.png', N'PRO03 - Dự án với công nghệ Servlet/JSP')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO04', N'Dự án với AngularJS & WebAPI', 300, 90, N'HTCS.jpg', N'PRO04 - Dự án với AngularJS & WebAPI')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO05', N'Dự án với Swing & JDBC', 300, 90, N'INMA.jpg', N'PRO05 - Dự án với Swing & JDBC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO06', N'Dự án với WindowForm', 300, 90, N'LAYO.jpg', N'PRO06 - Dự án với WindowForm')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'RDB01', N'Cơ sở dữ liệu SQL Server', 100, 50, N'MOWE.png', N'RDB01 - Cơ sở dữ liệu SQL Server')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'RDB02', N'Lập trình JDBC', 150, 60, N'Subject.png', N'RDB02 - Lập trình JDBC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'RDB03', N'Lập trình cơ sở dữ liệu Hibernate', 250, 80, N'GAME.png', N'RDB03 - Lập trình cơ sở dữ liệu Hibernate')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'SER01', N'Lập trình web với Servlet/JSP', 350, 100, N'HTCS.jpg', N'SER01 - Lập trình web với Servlet/JSP')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'SER02', N'Lập trình Spring MVC', 400, 110, N'INMA.jpg', N'SER02 - Lập trình Spring MVC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'SER03', N'Lập trình MS.NET MVC', 400, 110, N'LAYO.jpg', N'SER03 - Lập trình MS.NET MVC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'SER04', N'Xây dựng Web API với Spring MVC & ASP.NET MVC', 200, 70, N'MOWE.png', N'SER04 - Xây dựng Web API với Spring MVC & ASP.NET MVC')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'WEB01', N'Thiết kế web với HTML và CSS', 200, 70, N'Subject.png', N'WEB01 - Thiết kế web với HTML và CSS')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'WEB02', N'Thiết kế web với Bootstrap', 0, 40, N'GAME.png', N'WEB02 - Thiết kế web với Bootstrap')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'WEB03', N'Lập trình front-end với JavaScript và jQuery', 150, 60, N'HTCS.jpg', N'WEB03 - Lập trình front-end với JavaScript và jQuery')
-INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'WEB04', N'Lập trình AngularJS', 250, 80, N'INMA.jpg', N'WEB04 - Lập trình AngularJS')
+
+INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV01', N'Lập trình Java cơ bản', 300, 90, N'JAV01.png', N'JAV01 - Lập trình Java cơ bản')
+INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV02', N'Lập trình Java nâng cao', 300, 90, N'JAV02.png', N'JAV02 - Lập trình Java nâng cao')
+INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'JAV03', N'Lập trình mạng với Java', 200, 70, N'JAV03.png', N'JAV03 - Lập trình mạng với Java')
+INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO01', N'Dự án với công nghệ MS.NET MVC', 300, 90, N'PRO01.png', N'PRO01 - Dự án với công nghệ MS.NET MVC')
+INSERT [dbo].[ChuyenDe] ([MaCD], [TenCD], [HocPhi], [ThoiLuong], [Hinh], [MoTa]) VALUES (N'PRO02', N'Dự án với công nghệ Spring MVC', 300, 90, N'PRO02.png', N'PRO02 - Dự án với công nghệ Spring MVC')
 
 
-INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'PRO02', 300, 90, CAST(0xBF3D0B00 AS Date), N'', N'TeoNV', CAST(0xB53D0B00 AS Date))
-INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES ( N'PRO03', 300, 90, CAST(0xBF3D0B00 AS Date), N'', N'TeoNV', CAST(0xB53D0B00 AS Date))
-INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'RDB01', 100, 50, CAST(0xBF3D0B00 AS Date), N'', N'TeoNV', CAST(0xB53D0B00 AS Date))
-INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV01', 250, 80, CAST(0xBF3D0B00 AS Date), N'', N'TeoNV', CAST(0xB53D0B00 AS Date))
-INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV01', 100, 50, CAST(0xBF3D0B00 AS Date), N'', N'PheoNC', CAST(0xB53D0B00 AS Date))
-INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV01', 100, 50, CAST(0xBF3D0B00 AS Date), N'', N'NoPT', CAST(0xB53D0B00 AS Date))
+
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV01', 250, 80, '1-10-2018', N'', N'TeoNV', '3-20-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV01', 100, 50, '2-17-2018', N'', N'TeoNV', '6-17-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV01', 300, 90, '4-28-2018', N'', N'TeoNV', '12-16-2018')
+
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV02', 300, 90, '1-10-2018', N'', N'TeoNV', '3-20-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES ( N'JAV02', 300, 90, '2-17-2018', N'', N'TeoNV', '6-17-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV02', 100, 50, '4-28-2018', N'', N'TeoNV', '12-16-2018')
+
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV03', 250, 80, '1-10-2018', N'', N'TeoNV', '3-20-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES ( N'JAV03', 300, 90, '2-17-2018', N'', N'TeoNV', '6-17-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'JAV03', 100, 50, '4-28-2018', N'', N'TeoNV', '12-16-2018')
+
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'PRO01', 250, 80, '1-10-2018', N'', N'TeoNV', '3-20-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'PRO01', 100, 50, '2-17-2018', N'', N'TeoNV', '6-17-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'PRO01', 100, 50, '4-28-2018', N'', N'TeoNV', '12-16-2018')
+
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'PRO02', 250, 80,'1-10-2018', N'', N'TeoNV', '3-20-2018')
+INSERT [dbo].[KhoaHoc] ([MaCD], [HocPhi], [ThoiLuong], [NgayKG], [GhiChu], [MaNV], [NgayTao]) VALUES (N'PRO02', 100, 50, '2-17-2018', N'', N'TeoNV', '6-17-2018')
+
 
 
 INSERT [dbo].[NguoiHoc] ([MaNH], [HoTen], [NgaySinh], [GioiTinh], [DienThoai], [Email], [GhiChu], [MaNV], [NgayDK]) VALUES (N'PS01638', N'LỮ HUY CƯỜNG', CAST(0xAF170B00 AS Date), 1, N'0928768265', N'PS01638@fpt.edu.vn', N'0928768265 - LỮ HUY CƯỜNG', N'PheoNC', CAST(0xAF170B00 AS Date))
@@ -219,33 +219,188 @@ INSERT [dbo].[NguoiHoc] ([MaNH], [HoTen], [NgaySinh], [GioiTinh], [DienThoai], [
 INSERT [dbo].[NguoiHoc] ([MaNH], [HoTen], [NgaySinh], [GioiTinh], [DienThoai], [Email], [GhiChu], [MaNV], [NgayDK]) VALUES (N'PS03674', N'TRẦN TUẤN ANH', CAST(0xF41E0B00 AS Date), 1, N'0914082094', N'PS03674@fpt.edu.vn', N'0914082094 - TRẦN TUẤN ANH', N'PheoNC', CAST(0xF41E0B00 AS Date))
 
 
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS01638', 10)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02037', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02771', 10)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02930', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02983', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02988', 10)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS01638', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS02037', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS02771', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS02867', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS02930', 10)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS01638', 8)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02037', 9)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02867', 3)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS01638', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02037', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02771', 10)
 INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02930', 7)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02771', 8)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02979', 4)
 INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02983', 6)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02988', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03031', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03046', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03080', 10)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03088', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03096', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03104', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03120', 0)
-INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03130', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02988', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03674', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03662', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03640', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS02867', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (1, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02930', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS01638', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02037', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02867', 3)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS03411', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02771', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02979', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS02988', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS03031', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (2, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03046', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03080', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03088', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03096', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03104', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03120', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03130', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03134', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03172', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03202', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (3, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS01638', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS02037', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS02771', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS02930', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS02988', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS03674', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS03662', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS03640', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS02867', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (4, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02930', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS01638', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02037', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02867', 3)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS03411', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02771', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02979', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS02988', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS03031', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (5, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03046', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03080', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03088', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03096', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03104', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03120', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03130', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03134', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03172', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03202', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (6, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS01638', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS02037', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS02771', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS02930', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS02988', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS03674', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS03662', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS03640', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS02867', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (7, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02930', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS01638', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02037', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02867', 3)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS03411', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02771', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02979', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS02988', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS03031', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (8, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03046', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03080', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03088', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03096', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03104', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03120', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03130', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03134', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03172', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03202', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (9, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS01638', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS02037', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS02771', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS02930', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS02988', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS03674', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS03662', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS03640', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS02867', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (10, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02930', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS01638', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02037', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02867', 3)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS03411', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02771', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02979', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS02988', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS03031', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (11, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03046', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03080', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03088', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03096', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03104', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03120', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03130', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03134', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03172', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03202', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (12, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS01638', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS02037', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS02771', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS02930', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS02988', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS03674', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS03662', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS03640', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS02867', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (13, N'PS03603', 10)
+
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02930', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS01638', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02037', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02867', 3)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS03411', 7)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02771', 8)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02979', 4)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02983', 6)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS02988', 9)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS03031', 10)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS03530', 5)
+INSERT [dbo].[HocVien] ([MaKH], [MaNH], [Diem]) VALUES (14, N'PS03603', 10)
 
 
 Select *from NhanVien;
