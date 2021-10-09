@@ -16,7 +16,7 @@ public class EduSystem {
             for (i = 0; i <= 100; i++) {
                 loadingFrame.jProgressBar.setValue(i);
                 loadingFrame.loadingNum.setText(String.valueOf(i)+"%");
-                Thread.sleep(40);
+                Thread.sleep(20);
             }
             loadingFrame.dispose();
             new LoginFrame().setVisible(true);

@@ -6,6 +6,7 @@ import Model.NhanVien;
 import Utilities.Auth;
 import Utilities.MsgBox;
 import Utilities.XImage;
+import Utilities.XRegex;
 import java.awt.Image;
 import java.io.File;
 import java.util.List;
@@ -14,16 +15,16 @@ import javax.swing.JFileChooser;
 import javax.swing.table.DefaultTableModel;
 
 public class QuanLyNhanVien_Form extends javax.swing.JPanel {
-    
+
     NhanVienDAO dao = new NhanVienDAO();
     int row = -1;
-    
+
     public QuanLyNhanVien_Form() {
         initComponents();
         intit();
     }
-    
-    void intit(){
+
+    void intit() {
         setOpaque(false);
         scrollTable.setVerticalScrollBar(new ScrollBar());
         fillTable();
@@ -31,28 +32,28 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         updateStatus();
         clearForm();
     }
-    
+
     void fillTable() {
         DefaultTableModel model = (DefaultTableModel) tblNhanvien.getModel();
         model.setRowCount(0);
         try {
             List<NhanVien> list = dao.selectAll();
             for (NhanVien nv : list) {
-                Object[] row = {nv.getMaNV(), nv.getHoTen(),nv.getEmail(),stringToPass( nv.getMatKhau()), nv.getVaiTro() ? "Trưởng phòng" : "Nhân viên"};
+                Object[] row = {nv.getMaNV(), nv.getHoTen(), nv.getEmail(), stringToPass(nv.getMatKhau()), nv.getVaiTro() ? "Trưởng phòng" : "Nhân viên"};
                 model.addRow(row);
             }
         } catch (Exception e) {
             MsgBox.alert(this, "Lỗi truy vấn dữ liệu.");
         }
     }
-    
+
     void edit() {
         String maNV = (String) tblNhanvien.getValueAt(row, 0);
         NhanVien nv = dao.selectById(maNV);
         this.setForm(nv);
         this.updateStatus();
     }
-    
+
     void updateStatus() {
         boolean edit = (this.row >= 0);
         btnXoa.setEnabled(edit);
@@ -60,7 +61,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         btnLuu.setEnabled(!edit);
         txtMaNV.setEnabled(false);
     }
-    
+
     NhanVien getForm() {
         NhanVien nv = new NhanVien();
         nv.setMaNV(txtMaNV.getText());
@@ -71,7 +72,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         nv.setHinh(lblImage.getToolTipText());
         return nv;
     }
-    
+
     void setForm(NhanVien nv) {
         txtMaNV.setText(nv.getMaNV());
         txtHoTen.setText(nv.getHoTen());
@@ -80,7 +81,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         pwdXacNhan.setText(nv.getMatKhau());
         rdoNhanVien.setSelected(!nv.getVaiTro());
         rdoTruongPhong.setSelected(nv.getVaiTro());
-        if (nv.getHinh()!=null) {
+        if (nv.getHinh() != null) {
             lblImage.setToolTipText(nv.getHinh());
             ImageIcon icon = XImage.readImageNhanVien(nv.getHinh());
             Image img = icon.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
@@ -88,7 +89,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
             lblImage.setIcon(icon);
         }
     }
-    
+
     void clearForm() {
         NhanVien nv = new NhanVien();
         nv.setHinh("no-image.png");
@@ -97,39 +98,56 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         this.updateStatus();
         txtMaNV.setEnabled(true);
     }
- 
+
     void insert() {
         NhanVien nv = getForm();
-        if (!pwdXacNhan.getText().equals(nv.getMatKhau())) {
-            MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
-        } else {
-            try {
-                dao.insert(nv);
-                fillTable();
-                clearForm();
-                MsgBox.alert(this, "Thêm mới thành công.");
-            } catch (Exception e) {
-                MsgBox.alert(this, "Thêm mới thất bại.");
+        if (XRegex.checkNull(txtMaNV.getText(), txtHoTen.getText(), pwdMatKhau.getText(), pwdXacNhan.getText(), txtEmail.getText())) {
+            if (XRegex.checkMail(txtEmail.getText())) {
+                if (!pwdXacNhan.getText().equals(nv.getMatKhau())) {
+                    MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
+                } else {
+                    try {
+                        dao.insert(nv);
+                        fillTable();
+                        clearForm();
+                        MsgBox.alert(this, "Thêm mới thành công.");
+                    } catch (Exception e) {
+                        MsgBox.alert(this, "Thêm mới thất bại.");
+                    }
+                }
+            } else {
+                MsgBox.alert(this, "Email không đúng định dạng.");
             }
+        } else {
+            MsgBox.alert(this, "Vui lòng điền đầy đủ thông tin.");
         }
     }
-    
+
     void update() {
         NhanVien nv = getForm();
-        if (!pwdXacNhan.getText().equals(nv.getMatKhau())) {
-            MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
-        } else {
-            try {
-                dao.update(nv);
-                fillTable();
-                setForm(nv);
-                MsgBox.alert(this, "Cập nhật thành công.");
-            } catch (Exception e) {
-                MsgBox.alert(this, "Cập nhật thất bại.");
+        if (XRegex.checkNull(txtMaNV.getText(), txtHoTen.getText(), pwdMatKhau.getText(), pwdXacNhan.getText(), txtEmail.getText())) {
+            if (XRegex.checkMail(txtEmail.getText())) {
+                if (!pwdXacNhan.getText().equals(nv.getMatKhau())) {
+                    MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
+                } else {
+                    try {
+                        dao.update(nv);
+                        fillTable();
+                        setForm(nv);
+                        MsgBox.alert(this, "Cập nhật thành công.");
+                    } catch (Exception e) {
+                        MsgBox.alert(this, "Cập nhật thất bại.");
+                    }
+                }
+            } else {
+                MsgBox.alert(this, "Email không đúng định dạng.");
             }
+        } else {
+            MsgBox.alert(this, "Vui lòng điền đầy đủ thông tin.");
         }
+
     }
-    
+
     void delete() {
         String maNV = txtMaNV.getText();
         if (maNV.equals(Auth.user.getMaNV())) {
@@ -145,29 +163,27 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
             }
         }
     }
-    
-    void chonAnh(){
-        if(fileChooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION){
+
+    void chonAnh() {
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             XImage.saveImageNhanVien(file);
             ImageIcon icon = XImage.readImageNhanVien(file.getName());
-            System.out.println(icon);
-            Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+            Image img = icon.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
             icon = new ImageIcon(img);
             lblImage.setIcon(icon);
-            System.out.println(icon);
             lblImage.setToolTipText(file.getName());
         }
     }
-    
-    String stringToPass(String str){
-        String pass ="*";
-        for (int i = 0; i< str.length(); i++) {
-            pass+="*";
+
+    String stringToPass(String str) {
+        String pass = "*";
+        for (int i = 0; i < str.length(); i++) {
+            pass += "*";
         }
         return pass;
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -244,6 +260,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         btnThem.setBackground(new java.awt.Color(255, 255, 255));
         btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnThem.setForeground(new java.awt.Color(102, 102, 102));
+        btnThem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_plus_math_20px.png"))); // NOI18N
         btnThem.setText("Thêm mới");
         btnThem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -254,7 +271,8 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         btnLuu.setBackground(new java.awt.Color(255, 255, 255));
         btnLuu.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnLuu.setForeground(new java.awt.Color(102, 102, 102));
-        btnLuu.setText("Lưu");
+        btnLuu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_save_20px_1.png"))); // NOI18N
+        btnLuu.setText("   Lưu");
         btnLuu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLuuActionPerformed(evt);
@@ -264,7 +282,8 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         btnXoa.setBackground(new java.awt.Color(255, 255, 255));
         btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnXoa.setForeground(new java.awt.Color(102, 102, 102));
-        btnXoa.setText("Xoá");
+        btnXoa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_trash_can_20px.png"))); // NOI18N
+        btnXoa.setText("  Xoá");
         btnXoa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnXoaActionPerformed(evt);
@@ -274,7 +293,8 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         btnCapNhat.setBackground(new java.awt.Color(255, 255, 255));
         btnCapNhat.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnCapNhat.setForeground(new java.awt.Color(102, 102, 102));
-        btnCapNhat.setText("Cập nhật");
+        btnCapNhat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_update_left_rotation_20px.png"))); // NOI18N
+        btnCapNhat.setText(" Cập nhật");
         btnCapNhat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCapNhatActionPerformed(evt);
@@ -478,7 +498,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         if (evt.getClickCount() == 2) {
             this.row = tblNhanvien.getSelectedRow();
             this.edit();
-        }        
+        }
     }//GEN-LAST:event_tblNhanvienMouseClicked
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed

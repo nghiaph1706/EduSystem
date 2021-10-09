@@ -31,6 +31,9 @@ public class ForgotPasswordFrame extends javax.swing.JFrame {
         setBackground(new Color(0, 0, 0, 0));
         setLocationRelativeTo(this);
         btnDoiMK.setEnabled(false);
+        txtCode.setEnabled(false);
+        pwdMatKhau.setEnabled(false);
+        pwdXacNhan.setEnabled(false);
     }
 
     void sendCode() {
@@ -85,6 +88,13 @@ public class ForgotPasswordFrame extends javax.swing.JFrame {
 
         if (check) {
             sendCode();
+            btnSendCode.setEnabled(false);
+            txtMaNV.setEnabled(false);
+            txtEmail.setEnabled(false);
+            btnDoiMK.setEnabled(true);
+            txtCode.setEnabled(true);
+            pwdMatKhau.setEnabled(true);
+            pwdXacNhan.setEnabled(true);
         } else {
             MsgBox.alert(this, "Mã nhân viên nhập không khớp với Email.");
         }
@@ -316,8 +326,6 @@ public class ForgotPasswordFrame extends javax.swing.JFrame {
 
     private void btnSendCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendCodeActionPerformed
         checkUser(txtMaNV.getText().trim(), txtEmail.getText().trim());
-        btnSendCode.setEnabled(false);
-        btnDoiMK.setEnabled(true);
     }//GEN-LAST:event_btnSendCodeActionPerformed
 
     private void btnDoiMKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDoiMKActionPerformed

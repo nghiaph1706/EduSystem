@@ -115,7 +115,8 @@ public class LoginFrame extends javax.swing.JFrame {
         btnDangNhap.setBackground(new java.awt.Color(255, 255, 255));
         btnDangNhap.setFont(new java.awt.Font("Tahoma", 3, 14)); // NOI18N
         btnDangNhap.setForeground(new java.awt.Color(102, 102, 102));
-        btnDangNhap.setText("ĐĂNG NHẬP");
+        btnDangNhap.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnDangNhap.setText(" ĐĂNG NHẬP");
         btnDangNhap.setActionCommand("");
         btnDangNhap.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -159,13 +160,14 @@ public class LoginFrame extends javax.swing.JFrame {
                             .addComponent(jSeparator2))
                         .addGap(26, 26, 26))
                     .addGroup(panelBorderGradient2Layout.createSequentialGroup()
-                        .addGap(74, 74, 74)
                         .addGroup(panelBorderGradient2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnDangNhap, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(panelBorderGradient2Layout.createSequentialGroup()
-                                .addGap(21, 21, 21)
-                                .addComponent(lblQuenMK, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(104, Short.MAX_VALUE))))
+                                .addGap(95, 95, 95)
+                                .addComponent(lblQuenMK, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(panelBorderGradient2Layout.createSequentialGroup()
+                                .addGap(74, 74, 74)
+                                .addComponent(btnDangNhap)))
+                        .addContainerGap(105, Short.MAX_VALUE))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorderGradient2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblClose)

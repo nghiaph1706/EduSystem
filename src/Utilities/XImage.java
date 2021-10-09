@@ -18,7 +18,7 @@ public class XImage {
     }
     
     public static void saveImageChuyenDe(File src){
-        File dst = new File("src/Hinh/ChuyenDe", src.getName());
+        File dst = new File("src/Hinh/ChuyenDe",src.getName());
         if (!dst.getParentFile().exists()) {
             dst.getParentFile().mkdirs();
         }

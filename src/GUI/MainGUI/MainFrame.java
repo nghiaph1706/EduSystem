@@ -6,6 +6,8 @@ import GUI.Form.*;
 import Utilities.Auth;
 import Utilities.MsgBox;
 import java.awt.Color;
+import java.awt.Desktop;
+import java.io.File;
 import javax.swing.JComponent;
 
 public class MainFrame extends javax.swing.JFrame {
@@ -59,11 +61,9 @@ public class MainFrame extends javax.swing.JFrame {
                     setForm(new TaiKhoan_Form());
                     lblChucNang.setText("QUẢN LÝ TÀI KHOẢN");
                 } else if (index == 15) {
-                    setForm(new HuongDan_Form());
-                    lblChucNang.setText("HƯỚNG DẪN SỬ DỤNG");
+                    openHD();
                 }else if (index == 16) {
-                    setForm(new GioiThieu_Form());
-                    lblChucNang.setText("GIỚI THIỆU PHẦN MỀM");
+                    openHD();
                 } else if (index == 17) {
                     dangXuat();
                     setForm(new Welcome_Form() );
@@ -75,7 +75,7 @@ public class MainFrame extends javax.swing.JFrame {
         lblChucNang.setText("XIN CHÀO !");
     }
     
-    private void setForm(JComponent com){
+    void setForm(JComponent com){
         if (Auth.isLogin()) {
         mainPanel.removeAll();
         mainPanel.add(com);
@@ -93,13 +93,21 @@ public class MainFrame extends javax.swing.JFrame {
         
     }
     
-    private void dangXuat(){
+    void dangXuat(){
         Auth.clear();
     }
     
-    private void ketThuc(){
+    void ketThuc(){
         if (MsgBox.confirm(panelBorder1, "Bạn muốn kết thúc làm việc?")) {
             System.exit(0);
+        }
+    }
+    
+    void openHD(){
+        try {
+            Desktop.getDesktop().browse(new File("Help/index.html").toURI());
+        } catch (Exception e) {
+            MsgBox.alert(this, "Không tìm thấy file hướng dẫn.");
         }
     }
     

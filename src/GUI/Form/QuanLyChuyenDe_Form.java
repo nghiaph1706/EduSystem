@@ -5,6 +5,7 @@ import GUI.Swing.ScrollBar;
 import Model.ChuyenDe;
 import Utilities.MsgBox;
 import Utilities.XImage;
+import Utilities.XRegex;
 import java.awt.Color;
 import java.awt.Image;
 import java.io.File;
@@ -60,8 +61,8 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnCapNhat.setEnabled(edit);
         btnLuu.setEnabled(!edit);
         txtMaCD.setEnabled(false);
-        boolean first = (this.row==0);
-        boolean last = (this.row==tblChuyenDe.getRowCount()-1);
+        boolean first = (this.row == 0);
+        boolean last = (this.row == tblChuyenDe.getRowCount() - 1);
         btnFisrt.setEnabled(!first);
         btnPrev.setEnabled(!first);
         btnLast.setEnabled(!last);
@@ -105,25 +106,33 @@ public class QuanLyChuyenDe_Form extends JPanel {
 
     void insert() {
         ChuyenDe cd = getForm();
-        try {
-            dao.insert(cd);
-            fillTable();
-            clearForm();
-            MsgBox.alert(this, "Thêm mới thành công.");
-        } catch (Exception e) {
-            MsgBox.alert(this, "Thêm mới thất bại.");
+        if (XRegex.checkNull(txtMaCD.getText(), txtTenCD.getText(), txtHocPhi.getText(), txtThoiLuong.getText())) {
+            try {
+                dao.insert(cd);
+                fillTable();
+                clearForm();
+                MsgBox.alert(this, "Thêm mới thành công.");
+            } catch (Exception e) {
+                MsgBox.alert(this, "Thêm mới thất bại.");
+            }
+        } else {
+            MsgBox.alert(this, "Vui lòng điền đầy đủ thông tin.");
         }
     }
 
     void update() {
         ChuyenDe cd = getForm();
-        try {
-            dao.update(cd);
-            fillTable();
-            setForm(cd);
-            MsgBox.alert(this, "Cập nhật thành công.");
-        } catch (Exception e) {
-            MsgBox.alert(this, "Cập nhật thất bại.");
+        if (XRegex.checkNull(txtMaCD.getText(), txtTenCD.getText(), txtHocPhi.getText(), txtThoiLuong.getText())) {
+            try {
+                dao.update(cd);
+                fillTable();
+                setForm(cd);
+                MsgBox.alert(this, "Cập nhật thành công.");
+            } catch (Exception e) {
+                MsgBox.alert(this, "Cập nhật thất bại.");
+            }
+        } else {
+            MsgBox.alert(this, "Vui lòng điền đầy đủ thông tin.");
         }
     }
 
@@ -144,7 +153,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
     void first() {
         row = 0;
         edit();
-        
+
     }
 
     void next() {
@@ -191,8 +200,8 @@ public class QuanLyChuyenDe_Form extends JPanel {
             lblImage.setToolTipText(file.getName());
         }
     }
-    
-    void timKiem(){
+
+    void timKiem() {
         fillTable();
         clearForm();
         row = -1;
@@ -461,6 +470,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnThem.setBackground(new java.awt.Color(255, 255, 255));
         btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnThem.setForeground(new java.awt.Color(102, 102, 102));
+        btnThem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_plus_math_20px.png"))); // NOI18N
         btnThem.setText("Thêm mới");
         btnThem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -471,7 +481,8 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnLuu.setBackground(new java.awt.Color(255, 255, 255));
         btnLuu.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnLuu.setForeground(new java.awt.Color(102, 102, 102));
-        btnLuu.setText("Lưu");
+        btnLuu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_save_20px_1.png"))); // NOI18N
+        btnLuu.setText(" Lưu");
         btnLuu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLuuActionPerformed(evt);
@@ -481,7 +492,8 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnXoa.setBackground(new java.awt.Color(255, 255, 255));
         btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnXoa.setForeground(new java.awt.Color(102, 102, 102));
-        btnXoa.setText("Xoá");
+        btnXoa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_trash_can_20px.png"))); // NOI18N
+        btnXoa.setText(" Xoá");
         btnXoa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnXoaActionPerformed(evt);
@@ -491,7 +503,8 @@ public class QuanLyChuyenDe_Form extends JPanel {
         btnCapNhat.setBackground(new java.awt.Color(255, 255, 255));
         btnCapNhat.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnCapNhat.setForeground(new java.awt.Color(102, 102, 102));
-        btnCapNhat.setText("Cập nhật");
+        btnCapNhat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_update_left_rotation_20px.png"))); // NOI18N
+        btnCapNhat.setText(" Cập nhật");
         btnCapNhat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCapNhatActionPerformed(evt);
@@ -505,11 +518,11 @@ public class QuanLyChuyenDe_Form extends JPanel {
             .addGroup(BasicToolPanelLayout.createSequentialGroup()
                 .addComponent(btnThem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnLuu, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnCapNhat, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnXoa, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnLuu)
+                .addGap(14, 14, 14)
+                .addComponent(btnCapNhat)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnXoa)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         BasicToolPanelLayout.setVerticalGroup(

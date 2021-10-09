@@ -67,7 +67,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             for (int i = 0; i < list.size(); i++) {
                 HocVien hv = list.get(i);
                 String hoten = nhdao.selectById(hv.getMaNH()).getHoTen();
-                model.addRow(new Object[]{i+1,hv.getMaHV(),hv.getMaNH(),hoten,hv.getDiem()});
+                model.addRow(new Object[]{hv.getMaHV(),hv.getMaNH(),hoten,hv.getDiem()});
             }
             fillTableNguoiHoc();
         }
@@ -114,9 +114,9 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
     
     void updateDiem(){
         for (int i = 0; i < tblHocVien.getRowCount(); i++) {
-            int mahv = (int) tblHocVien.getValueAt(i, 1);
+            int mahv = (int) tblHocVien.getValueAt(i, 0);
             HocVien hv = hvdao.selectById(mahv);
-            hv.setDiem((double) tblHocVien.getValueAt(i, 4));
+            hv.setDiem((double) tblHocVien.getValueAt(i, 3));
             hvdao.update(hv);
         }
         MsgBox.alert(this, "Cập nhật điểm thành công.");
@@ -251,11 +251,11 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
 
             },
             new String [] {
-                "STT", "Mã học viên", "Mã người học", "Họ tên", "Điểm"
+                "Mã học viên", "Mã người học", "Họ tên", "Điểm"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, true
+                false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -296,7 +296,8 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         btnXoa.setBackground(new java.awt.Color(255, 255, 255));
         btnXoa.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnXoa.setForeground(new java.awt.Color(102, 102, 102));
-        btnXoa.setText("Xoá khỏi khoá học");
+        btnXoa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_trash_can_20px.png"))); // NOI18N
+        btnXoa.setText(" Xoá khỏi khoá học");
         btnXoa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnXoaActionPerformed(evt);
@@ -306,7 +307,8 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         btnCapNhatDiem.setBackground(new java.awt.Color(255, 255, 255));
         btnCapNhatDiem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnCapNhatDiem.setForeground(new java.awt.Color(102, 102, 102));
-        btnCapNhatDiem.setText("Cập nhật điểm");
+        btnCapNhatDiem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_update_left_rotation_20px.png"))); // NOI18N
+        btnCapNhatDiem.setText(" Cập nhật điểm");
         btnCapNhatDiem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCapNhatDiemActionPerformed(evt);
@@ -319,9 +321,9 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(BasicToolPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
+                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
                 .addContainerGap())
         );
         BasicToolPanelLayout.setVerticalGroup(
@@ -336,29 +338,28 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         TabHocVienPanelLayout.setHorizontalGroup(
             TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(TabHocVienPanelLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cbxChuyenDe, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(TabHocVienPanelLayout.createSequentialGroup()
+                        .addComponent(lblCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(126, 126, 126)))
+                .addGap(70, 70, 70)
                 .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(TabHocVienPanelLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cbxChuyenDe, 0, 281, Short.MAX_VALUE)
-                            .addGroup(TabHocVienPanelLayout.createSequentialGroup()
-                                .addComponent(lblCD, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
-                                .addGap(126, 126, 126)))
-                        .addGap(70, 70, 70)
-                        .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(TabHocVienPanelLayout.createSequentialGroup()
-                                .addComponent(lblKhoaHoc, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
-                                .addGap(126, 126, 126))
-                            .addComponent(cbxKhoaHoc, 0, 281, Short.MAX_VALUE))
-                        .addGap(374, 374, 374))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabHocVienPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addComponent(lblKhoaHoc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(126, 126, 126))
+                    .addComponent(cbxKhoaHoc, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(384, 384, 384))
             .addGroup(TabHocVienPanelLayout.createSequentialGroup()
-                .addGap(340, 340, 340)
-                .addComponent(BasicToolPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(341, 341, 341))
+                .addGroup(TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(TabHocVienPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(scrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 967, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(TabHocVienPanelLayout.createSequentialGroup()
+                        .addGap(228, 228, 228)
+                        .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
         TabHocVienPanelLayout.setVerticalGroup(
             TabHocVienPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -372,7 +373,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
                     .addComponent(cbxChuyenDe, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbxKhoaHoc, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(31, 31, 31)
-                .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
+                .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(36, 36, 36))
@@ -447,7 +448,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SearchBarPanel1Layout.createSequentialGroup()
                 .addComponent(lblSearchIconNguoiHoc)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFindNguoiHoc, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+                .addComponent(txtFindNguoiHoc, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
                 .addGap(20, 20, 20))
         );
         SearchBarPanel1Layout.setVerticalGroup(
@@ -462,7 +463,8 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         btnThem.setBackground(new java.awt.Color(255, 255, 255));
         btnThem.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnThem.setForeground(new java.awt.Color(102, 102, 102));
-        btnThem.setText("Thêm vào khoá học");
+        btnThem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_plus_math_20px.png"))); // NOI18N
+        btnThem.setText(" Thêm vào khoá học");
         btnThem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnThemActionPerformed(evt);
@@ -476,15 +478,15 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             .addGroup(TabNguoiHocPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(TabNguoiHocPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrollTable1, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)
+                    .addComponent(scrollTable1, javax.swing.GroupLayout.DEFAULT_SIZE, 980, Short.MAX_VALUE)
                     .addGroup(TabNguoiHocPanelLayout.createSequentialGroup()
                         .addComponent(SearchBarPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(545, 545, 545)))
                 .addContainerGap())
             .addGroup(TabNguoiHocPanelLayout.createSequentialGroup()
                 .addGap(405, 405, 405)
-                .addComponent(btnThem, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                .addGap(440, 440, 440))
+                .addComponent(btnThem)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         TabNguoiHocPanelLayout.setVerticalGroup(
             TabNguoiHocPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -492,7 +494,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
                 .addGap(30, 30, 30)
                 .addComponent(SearchBarPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
-                .addComponent(scrollTable1, javax.swing.GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)
+                .addComponent(scrollTable1, javax.swing.GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(btnThem, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(27, 27, 27))

@@ -1,26 +1,26 @@
-
 package GUI.Form;
 
 import DAO.NhanVienDAO;
 import Utilities.Auth;
 import Utilities.MsgBox;
 import Utilities.XImage;
+import Utilities.XRegex;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 
 public class TaiKhoan_Form extends javax.swing.JPanel {
-    
+
     NhanVienDAO dao = new NhanVienDAO();
 
     public TaiKhoan_Form() {
         initComponents();
         intit();
     }
-    
-    void intit(){
+
+    void intit() {
         lblHoTen.setText(Auth.user.getHoTen());
         lblManv.setText(Auth.user.getMaNV());
-        if (Auth.user.getHinh()!=null) {
+        if (Auth.user.getHinh() != null) {
             lblImage.setToolTipText(Auth.user.getHinh());
             ImageIcon icon = XImage.readImageNhanVien(Auth.user.getHinh());
             Image img = icon.getImage().getScaledInstance(lblImage.getPreferredSize().width, lblImage.getPreferredSize().height, Image.SCALE_SMOOTH);
@@ -28,17 +28,22 @@ public class TaiKhoan_Form extends javax.swing.JPanel {
             lblImage.setIcon(icon);
         }
     }
-    
-    void doiMatKhau(String matKhauCu, String matKhauMoi, String xacNhan){
-        if (!matKhauCu.equalsIgnoreCase(Auth.user.getMatKhau())) {
-            MsgBox.alert(this, "Sai mật khẩu.");
-        } else if (!matKhauMoi.equalsIgnoreCase(xacNhan)) {
-            MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
+
+    void doiMatKhau(String matKhauCu, String matKhauMoi, String xacNhan) {
+        if (XRegex.checkNull(matKhauCu, matKhauMoi, xacNhan)) {
+            if (!matKhauCu.equalsIgnoreCase(Auth.user.getMatKhau())) {
+                MsgBox.alert(this, "Sai mật khẩu.");
+            } else if (!matKhauMoi.equalsIgnoreCase(xacNhan)) {
+                MsgBox.alert(this, "Xác nhận mật khẩu không đúng.");
+            } else {
+                Auth.user.setMatKhau(xacNhan);
+                dao.update(Auth.user);
+                MsgBox.alert(this, "Đổi mật khẩu thành công.");
+            }
         } else {
-            Auth.user.setMatKhau(xacNhan);
-            dao.update(Auth.user);
-            MsgBox.alert(this, "Đổi mật khẩu thành công.");
+            MsgBox.alert(this, "Vui lòng điền đầy đủ thông tin.");
         }
+
     }
 
     @SuppressWarnings("unchecked")

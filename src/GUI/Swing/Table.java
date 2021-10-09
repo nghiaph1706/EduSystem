@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 import sun.swing.table.DefaultTableCellHeaderRenderer;
 
 public class Table extends JTable {
