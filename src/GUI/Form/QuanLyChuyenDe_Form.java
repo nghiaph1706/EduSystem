@@ -4,6 +4,7 @@ import DAO.ChuyenDeDAO;
 import GUI.Swing.ScrollBar;
 import Model.ChuyenDe;
 import Utilities.MsgBox;
+import Utilities.XExcel;
 import Utilities.XImage;
 import Utilities.XRegex;
 import java.awt.Color;
@@ -13,7 +14,9 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 public class QuanLyChuyenDe_Form extends JPanel {
 
@@ -27,6 +30,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
 
     void intit() {
         scrollTable.setVerticalScrollBar(new ScrollBar());
+        tblChuyenDe.setToolTipText("Chuyên đề.");
         fillTable();
         row = -1;
         updateStatus();
@@ -200,12 +204,15 @@ public class QuanLyChuyenDe_Form extends JPanel {
             lblImage.setToolTipText(file.getName());
         }
     }
-
-    void timKiem() {
-        fillTable();
-        clearForm();
-        row = -1;
-        updateStatus();
+    
+    void timKiem(String keyWord) {
+        DefaultTableModel model = (DefaultTableModel) tblChuyenDe.getModel();
+        try {
+            TableRowSorter tb = new TableRowSorter(model);
+            tblChuyenDe.setRowSorter(tb);
+            tb.setRowFilter(RowFilter.regexFilter(keyWord, 1));
+        } catch (Exception e) {
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -226,6 +233,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
         SearchBarPanel = new GUI.Swing.PanelBorder();
         lblSearchIcon = new javax.swing.JLabel();
         txtFind = new javax.swing.JTextField();
+        btnExportTable = new javax.swing.JButton();
         TabCapNhatPanel = new GUI.Swing.PanelBorder();
         lblMaCD = new javax.swing.JLabel();
         txtMaCD = new javax.swing.JTextField();
@@ -371,6 +379,11 @@ public class QuanLyChuyenDe_Form extends JPanel {
         txtFind.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         txtFind.setToolTipText("Tìm theo mã chuyên đề.");
         txtFind.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtFind.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFindKeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout SearchBarPanelLayout = new javax.swing.GroupLayout(SearchBarPanel);
         SearchBarPanel.setLayout(SearchBarPanelLayout);
@@ -391,6 +404,17 @@ public class QuanLyChuyenDe_Form extends JPanel {
                     .addComponent(txtFind, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
+        btnExportTable.setBackground(new java.awt.Color(255, 255, 255));
+        btnExportTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnExportTable.setForeground(new java.awt.Color(102, 102, 102));
+        btnExportTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnExportTable.setText(" Export Table");
+        btnExportTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTableActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout TabDanhSachPanelLayout = new javax.swing.GroupLayout(TabDanhSachPanel);
         TabDanhSachPanel.setLayout(TabDanhSachPanelLayout);
         TabDanhSachPanelLayout.setHorizontalGroup(
@@ -404,6 +428,10 @@ public class QuanLyChuyenDe_Form extends JPanel {
                     .addGroup(TabDanhSachPanelLayout.createSequentialGroup()
                         .addComponent(SearchBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(526, 526, 526))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabDanhSachPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnExportTable, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(338, 338, 338))
         );
         TabDanhSachPanelLayout.setVerticalGroup(
             TabDanhSachPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -411,8 +439,10 @@ public class QuanLyChuyenDe_Form extends JPanel {
                 .addGap(50, 50, 50)
                 .addComponent(SearchBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
-                .addComponent(scrollTable)
-                .addGap(89, 89, 89))
+                .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(btnExportTable)
+                .addGap(42, 42, 42))
         );
 
         TabMainPanel.add(TabDanhSachPanel, "card2");
@@ -775,9 +805,17 @@ public class QuanLyChuyenDe_Form extends JPanel {
         last();
     }//GEN-LAST:event_btnLastActionPerformed
 
+    private void txtFindKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFindKeyReleased
+        timKiem(txtFind.getText().trim());
+    }//GEN-LAST:event_txtFindKeyReleased
+
     private void lblSearchIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchIconMouseClicked
-        timKiem();
+        timKiem(txtFind.getText().trim());
     }//GEN-LAST:event_lblSearchIconMouseClicked
+
+    private void btnExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportTableActionPerformed
+        XExcel.exportTable(tblChuyenDe);
+    }//GEN-LAST:event_btnExportTableActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -791,6 +829,7 @@ public class QuanLyChuyenDe_Form extends JPanel {
     private GUI.Swing.PanelBorder TabDanhSachPanel;
     private GUI.Swing.PanelBorder TabMainPanel;
     private javax.swing.JButton btnCapNhat;
+    private javax.swing.JButton btnExportTable;
     private javax.swing.JButton btnFisrt;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnLuu;

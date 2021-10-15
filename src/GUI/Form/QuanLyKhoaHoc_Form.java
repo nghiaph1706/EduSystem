@@ -8,11 +8,14 @@ import Model.KhoaHoc;
 import Utilities.Auth;
 import Utilities.MsgBox;
 import Utilities.XDate;
+import Utilities.XExcel;
 import Utilities.XRegex;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
 
@@ -27,6 +30,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
 
     void intit() {
         scrollTable.setVerticalScrollBar(new ScrollBar());
+        tblKhoaHoc.setToolTipText("Khoá học.");
         fillTable();
         fillcbxChuyenDe();
         clearForm();
@@ -225,10 +229,14 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         tabDSSelected(false);
     }
 
-    void timKiem() {
-        fillTable();
-        row = -1;
-        updateStatus();
+    void timKiem(String keyWord) {
+        DefaultTableModel model = (DefaultTableModel) tblKhoaHoc.getModel();
+        try {
+            TableRowSorter tb = new TableRowSorter(model);
+            tblKhoaHoc.setRowSorter(tb);
+            tb.setRowFilter(RowFilter.regexFilter(keyWord, 1));
+        } catch (Exception e) {
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -250,6 +258,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         txtFind = new javax.swing.JTextField();
         scrollTable = new javax.swing.JScrollPane();
         tblKhoaHoc = new GUI.Swing.Table();
+        btnExportTable = new javax.swing.JButton();
         TabCapNhatPanel = new GUI.Swing.PanelBorder();
         lblCD = new javax.swing.JLabel();
         lblNgayKhaiGiang = new javax.swing.JLabel();
@@ -395,6 +404,11 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
         txtFind.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         txtFind.setToolTipText("Tìm theo mã chuyên đề.");
         txtFind.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtFind.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFindKeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout SearchBarPanelLayout = new javax.swing.GroupLayout(SearchBarPanel);
         SearchBarPanel.setLayout(SearchBarPanelLayout);
@@ -403,7 +417,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SearchBarPanelLayout.createSequentialGroup()
                 .addComponent(lblSearchIcon)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFind, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+                .addComponent(txtFind, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
                 .addGap(49, 49, 49))
         );
         SearchBarPanelLayout.setVerticalGroup(
@@ -453,6 +467,17 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
             tblKhoaHoc.getColumnModel().getColumn(2).setMaxWidth(120);
         }
 
+        btnExportTable.setBackground(new java.awt.Color(255, 255, 255));
+        btnExportTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnExportTable.setForeground(new java.awt.Color(102, 102, 102));
+        btnExportTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnExportTable.setText(" Export Table");
+        btnExportTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTableActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout TabDanhSachPanelLayout = new javax.swing.GroupLayout(TabDanhSachPanel);
         TabDanhSachPanel.setLayout(TabDanhSachPanelLayout);
         TabDanhSachPanelLayout.setHorizontalGroup(
@@ -465,6 +490,10 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                         .addGap(516, 516, 516))
                     .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE))
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabDanhSachPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnExportTable, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(450, 450, 450))
         );
         TabDanhSachPanelLayout.setVerticalGroup(
             TabDanhSachPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -473,7 +502,9 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
                 .addComponent(SearchBarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(scrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
-                .addGap(77, 77, 77))
+                .addGap(18, 18, 18)
+                .addComponent(btnExportTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(30, 30, 30))
         );
 
         TabMainPanel.add(TabDanhSachPanel, "card2");
@@ -852,8 +883,16 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
     }//GEN-LAST:event_cbxChuyenDeActionPerformed
 
     private void lblSearchIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchIconMouseClicked
-        timKiem();
+        timKiem(txtFind.getText().trim());
     }//GEN-LAST:event_lblSearchIconMouseClicked
+
+    private void txtFindKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFindKeyReleased
+        timKiem(txtFind.getText().trim());
+    }//GEN-LAST:event_txtFindKeyReleased
+
+    private void btnExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportTableActionPerformed
+        XExcel.exportTable(tblKhoaHoc);
+    }//GEN-LAST:event_btnExportTableActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -867,6 +906,7 @@ public class QuanLyKhoaHoc_Form extends javax.swing.JPanel {
     private GUI.Swing.PanelBorder TabDanhSachPanel;
     private GUI.Swing.PanelBorder TabMainPanel;
     private javax.swing.JButton btnCapNhat;
+    private javax.swing.JButton btnExportTable;
     private javax.swing.JButton btnFisrt;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnLuu;

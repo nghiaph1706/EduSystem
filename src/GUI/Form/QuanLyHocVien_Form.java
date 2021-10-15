@@ -12,6 +12,7 @@ import Model.KhoaHoc;
 import Model.NguoiHoc;
 import Utilities.Auth;
 import Utilities.MsgBox;
+import Utilities.XExcel;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -32,6 +33,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
     void intit(){
         scrollTable.setVerticalScrollBar(new ScrollBar());
         scrollTable1.setVerticalScrollBar(new ScrollBar());
+        tblHocVien.setToolTipText("Học viên.");
         fillCbxChuyenDe();
     }
     
@@ -158,6 +160,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         BasicToolPanel = new javax.swing.JPanel();
         btnXoa = new javax.swing.JButton();
         btnCapNhatDiem = new javax.swing.JButton();
+        btnExportTable = new javax.swing.JButton();
         TabNguoiHocPanel = new GUI.Swing.PanelBorder();
         scrollTable1 = new javax.swing.JScrollPane();
         tblNguoiHoc = new GUI.Swing.Table();
@@ -315,22 +318,36 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
             }
         });
 
+        btnExportTable.setBackground(new java.awt.Color(255, 255, 255));
+        btnExportTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnExportTable.setForeground(new java.awt.Color(102, 102, 102));
+        btnExportTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnExportTable.setText(" Export Table");
+        btnExportTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTableActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout BasicToolPanelLayout = new javax.swing.GroupLayout(BasicToolPanel);
         BasicToolPanel.setLayout(BasicToolPanelLayout);
         BasicToolPanelLayout.setHorizontalGroup(
             BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(BasicToolPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(btnXoa)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCapNhatDiem)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnExportTable, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(18, Short.MAX_VALUE))
         );
         BasicToolPanelLayout.setVerticalGroup(
             BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(BasicToolPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(btnXoa, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE))
+                .addComponent(btnCapNhatDiem, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                .addComponent(btnExportTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout TabHocVienPanelLayout = new javax.swing.GroupLayout(TabHocVienPanel);
@@ -571,6 +588,10 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
         fillTableNguoiHoc();
     }//GEN-LAST:event_txtFindNguoiHocActionPerformed
 
+    private void btnExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportTableActionPerformed
+        XExcel.exportTable(tblHocVien);
+    }//GEN-LAST:event_btnExportTableActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel BasicToolPanel;
@@ -582,6 +603,7 @@ public class QuanLyHocVien_Form extends javax.swing.JPanel {
     private GUI.Swing.PanelBorder TabMainPanel;
     private GUI.Swing.PanelBorder TabNguoiHocPanel;
     private javax.swing.JButton btnCapNhatDiem;
+    private javax.swing.JButton btnExportTable;
     private javax.swing.JButton btnThem;
     private javax.swing.JButton btnXoa;
     private javax.swing.JComboBox<String> cbxChuyenDe;

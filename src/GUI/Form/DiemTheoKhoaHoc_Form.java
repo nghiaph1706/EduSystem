@@ -7,6 +7,7 @@ import GUI.Chart.BarChart.BarChart;
 import GUI.Chart.BarChart.ModelChart;
 import GUI.Swing.ScrollBar;
 import Model.KhoaHoc;
+import Utilities.XExcel;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -25,6 +26,7 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
     
     void intit(){
         scrollPane.setVerticalScrollBar(new ScrollBar());
+        tblBangDiem.setToolTipText("Bảng điểm.");
         fillCbxKhoaHoc();
         fillTable();
     }
@@ -114,6 +116,7 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
         TabBangDiemPanel = new GUI.Swing.PanelBorder();
         scrollPane = new javax.swing.JScrollPane();
         tblBangDiem = new GUI.Swing.Table();
+        btnExportTable = new javax.swing.JButton();
         TabThongKePanel = new GUI.Swing.PanelBorder();
         chartPanel = new javax.swing.JPanel();
 
@@ -234,14 +237,30 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
         });
         scrollPane.setViewportView(tblBangDiem);
 
+        btnExportTable.setBackground(new java.awt.Color(255, 255, 255));
+        btnExportTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnExportTable.setForeground(new java.awt.Color(102, 102, 102));
+        btnExportTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnExportTable.setText(" Export Table");
+        btnExportTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTableActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout TabBangDiemPanelLayout = new javax.swing.GroupLayout(TabBangDiemPanel);
         TabBangDiemPanel.setLayout(TabBangDiemPanelLayout);
         TabBangDiemPanelLayout.setHorizontalGroup(
             TabBangDiemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(TabBangDiemPanelLayout.createSequentialGroup()
                 .addGap(56, 56, 56)
-                .addComponent(scrollPane)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 921, Short.MAX_VALUE)
                 .addGap(49, 49, 49))
+            .addGroup(TabBangDiemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabBangDiemPanelLayout.createSequentialGroup()
+                    .addContainerGap(438, Short.MAX_VALUE)
+                    .addComponent(btnExportTable, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(430, Short.MAX_VALUE)))
         );
         TabBangDiemPanelLayout.setVerticalGroup(
             TabBangDiemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -249,6 +268,11 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
                 .addGap(29, 29, 29)
                 .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(125, Short.MAX_VALUE))
+            .addGroup(TabBangDiemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TabBangDiemPanelLayout.createSequentialGroup()
+                    .addContainerGap(570, Short.MAX_VALUE)
+                    .addComponent(btnExportTable)
+                    .addContainerGap(62, Short.MAX_VALUE)))
         );
 
         TabMainPanel.add(TabBangDiemPanel, "card2");
@@ -325,6 +349,10 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
         fillTable();
     }//GEN-LAST:event_cbxKhoaHocActionPerformed
 
+    private void btnExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportTableActionPerformed
+        XExcel.exportTable(tblBangDiem);
+    }//GEN-LAST:event_btnExportTableActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel BangDiem;
@@ -333,6 +361,7 @@ public class DiemTheoKhoaHoc_Form extends javax.swing.JPanel {
     private GUI.Swing.PanelBorder TabMainPanel;
     private GUI.Swing.PanelBorder TabThongKePanel;
     private javax.swing.JPanel ThongKe;
+    private javax.swing.JButton btnExportTable;
     private javax.swing.JComboBox<String> cbxKhoaHoc;
     private javax.swing.JPanel chartPanel;
     private javax.swing.JLabel lblBangDiem;

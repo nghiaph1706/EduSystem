@@ -6,6 +6,7 @@ import DAO.ThongKeDAO;
 import GUI.Chart.BarChart.BarChart;
 import GUI.Chart.BarChart.ModelChart;
 import GUI.Swing.ScrollBar;
+import Utilities.XExcel;
 import java.awt.Color;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -25,6 +26,7 @@ public class DoanhThu_Form extends javax.swing.JPanel {
     
     void intit(){
         scrollPane.setVerticalScrollBar(new ScrollBar());
+        tblDoanhThu.setToolTipText("Doanh thu.");
         fillCbxNam();
         fillTable();
     }
@@ -102,6 +104,7 @@ public class DoanhThu_Form extends javax.swing.JPanel {
         chartPanel = new javax.swing.JPanel();
         lblChartBy = new javax.swing.JLabel();
         cbxChart = new javax.swing.JComboBox<>();
+        btnExportTable = new javax.swing.JButton();
 
         panelBorder1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -156,6 +159,17 @@ public class DoanhThu_Form extends javax.swing.JPanel {
             }
         });
 
+        btnExportTable.setBackground(new java.awt.Color(255, 255, 255));
+        btnExportTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnExportTable.setForeground(new java.awt.Color(102, 102, 102));
+        btnExportTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnExportTable.setText(" Export Table");
+        btnExportTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTableActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelBorder1Layout = new javax.swing.GroupLayout(panelBorder1);
         panelBorder1.setLayout(panelBorder1Layout);
         panelBorder1Layout.setHorizontalGroup(
@@ -174,6 +188,10 @@ public class DoanhThu_Form extends javax.swing.JPanel {
                 .addGap(24, 24, 24)
                 .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 975, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnExportTable, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(389, 389, 389))
             .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(panelBorder1Layout.createSequentialGroup()
                     .addGap(25, 25, 25)
@@ -191,14 +209,16 @@ public class DoanhThu_Form extends javax.swing.JPanel {
                     .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblNam, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(cbxNam, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 391, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 351, Short.MAX_VALUE)
+                .addComponent(btnExportTable)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chartPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(panelBorder1Layout.createSequentialGroup()
                     .addGap(65, 65, 65)
-                    .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 357, Short.MAX_VALUE)
-                    .addGap(363, 363, 363)))
+                    .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(399, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -222,8 +242,13 @@ public class DoanhThu_Form extends javax.swing.JPanel {
         fillTable();
     }//GEN-LAST:event_cbxChartActionPerformed
 
+    private void btnExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportTableActionPerformed
+        XExcel.exportTable(tblDoanhThu);
+    }//GEN-LAST:event_btnExportTableActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExportTable;
     private javax.swing.JComboBox<String> cbxChart;
     private javax.swing.JComboBox<String> cbxNam;
     private javax.swing.JPanel chartPanel;

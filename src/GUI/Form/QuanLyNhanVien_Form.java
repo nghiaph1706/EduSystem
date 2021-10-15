@@ -5,6 +5,7 @@ import GUI.Swing.ScrollBar;
 import Model.NhanVien;
 import Utilities.Auth;
 import Utilities.MsgBox;
+import Utilities.XExcel;
 import Utilities.XImage;
 import Utilities.XRegex;
 import java.awt.Image;
@@ -27,6 +28,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
     void intit() {
         setOpaque(false);
         scrollTable.setVerticalScrollBar(new ScrollBar());
+        tblNhanvien.setToolTipText("Nhân viên.");
         fillTable();
         row = -1;
         updateStatus();
@@ -212,6 +214,7 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         pwdXacNhan = new javax.swing.JPasswordField();
         lblEmail = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
+        btnExportTable = new javax.swing.JButton();
 
         setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
         setPreferredSize(new java.awt.Dimension(1026, 785));
@@ -392,6 +395,17 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         txtEmail.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         txtEmail.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        btnExportTable.setBackground(new java.awt.Color(255, 255, 255));
+        btnExportTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnExportTable.setForeground(new java.awt.Color(102, 102, 102));
+        btnExportTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/Icon/icons8_enter_20px.png"))); // NOI18N
+        btnExportTable.setText(" Export Table");
+        btnExportTable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportTableActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelBorder1Layout = new javax.swing.GroupLayout(panelBorder1);
         panelBorder1.setLayout(panelBorder1Layout);
         panelBorder1Layout.setHorizontalGroup(
@@ -435,8 +449,13 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                         .addGap(171, 171, 171))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(171, 171, 171))
+                .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
+                        .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(171, 171, 171))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder1Layout.createSequentialGroup()
+                        .addComponent(btnExportTable)
+                        .addGap(407, 407, 407))))
         );
         panelBorder1Layout.setVerticalGroup(
             panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -469,10 +488,12 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
                         .addGroup(panelBorder1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lblXacNhan)
                             .addComponent(pwdXacNhan, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(18, 18, Short.MAX_VALUE)
+                .addGap(18, 48, Short.MAX_VALUE)
                 .addComponent(BasicToolPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(scrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(9, 9, 9)
+                .addComponent(btnExportTable)
                 .addContainerGap())
         );
 
@@ -521,10 +542,15 @@ public class QuanLyNhanVien_Form extends javax.swing.JPanel {
         chonAnh();
     }//GEN-LAST:event_lblImageMouseClicked
 
+    private void btnExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportTableActionPerformed
+        XExcel.exportTable(tblNhanvien);
+    }//GEN-LAST:event_btnExportTableActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel BasicToolPanel;
     private javax.swing.JButton btnCapNhat;
+    private javax.swing.JButton btnExportTable;
     private javax.swing.JButton btnLuu;
     private javax.swing.JButton btnThem;
     private javax.swing.JButton btnXoa;
