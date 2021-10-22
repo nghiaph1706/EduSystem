@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edu System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section class="header">
+        <nav>
+            <a href="index.html"><img class="logo-fpt" src="image/logo.png"></a>
+            <div class="nav-links">
+                <ul>
+                    <li><a href="">Home</a></li>
+                    <li><a href="">Download</a></li>
+                    <li><a href="">Blog</a></li>
+                    <li><a href="">Help</a></li>
+                    <li><a href="">Forum</a></li>
+                </ul>
+            </div>
+        </nav>
+    <div class="text-box">
+        <h1>Manager Education System</h1>
+        <p>Mục tiêu của môn học này là cung cấp cho sinh viên một cái nhìn 
+            tổng quan về việc làm dự án phần mềm theo qui trình công 
+            nghiệp sát với thực tế hiện nay.
+        </p> 
+        <a href="" class="hero-btn">Visit Us To know More</a>
+    </div>
+    </section>
+
+    <section class="course">
+        <h1>CÁC CHỨC NĂNG CHÍNH</h1>
+        <p>Đơn giản - Thân thiện - Toàn diện</p>
+    
+        <div class="row">
+            <div class="course-col">
+                <img src="Image/manager.jpg">
+                <h3>QUẢN LÝ</h3>
+                <p>Mục tiêu của môn học này là cung cấp cho sinh viên một cái nhìn 
+                    tổng quan về việc làm dự án phần mềm theo qui trình công 
+                    nghiệp sát với thực tế hiện nay.
+                </p>
+            </div>
+            <div class="course-col">
+                <img src="Image/statistical.jpg">
+                <h3>THỐNG KÊ</h3>
+                <p>Mục tiêu của môn học này là cung cấp cho sinh viên một cái nhìn 
+                    tổng quan về việc làm dự án phần mềm theo qui trình công 
+                    nghiệp sát với thực tế hiện nay.
+                </p>
+            </div>
+            <div class="course-col">
+                <img src="Image/safety.jpg">
+                <h3>BẢO MẬT</h3>
+                <p>Mục tiêu của môn học này là cung cấp cho sinh viên một cái nhìn 
+                    tổng quan về việc làm dự án phần mềm theo qui trình công 
+                    nghiệp sát với thực tế hiện nay.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="loginFrame">
+        <h1>MÀN HÌNH ĐĂNG NHẬP</h1>
+        <div class="row-slide">
+            <div class="slider">
+                <div class="slides">
+                    <input type="radio" name="radio-btn" id="radio1">
+                    <input type="radio" name="radio-btn" id="radio2">
+                    <input type="radio" name="radio-btn" id="radio3">
+                    <input type="radio" name="radio-btn" id="radio4">
+    
+                    <div class="slide first">
+                        <img src="Image/JAV01.png" alt="">
+                    </div>
+                    <div class="slide">
+                        <img src="Image/JAV02.png" alt="">
+                    </div>
+                    <div class="slide">
+                        <img src="Image/JAV03.png" alt="">
+                    </div>
+                    <div class="slide">
+                        <img src="Image/PRO01.png" alt="">
+                    </div>
+    
+                    <div class="navigation-auto">
+                        <div class="auto-btn1"></div>
+                        <div class="auto-btn2"></div>
+                        <div class="auto-btn3"></div>
+                        <div class="auto-btn4"></div>
+                    </div>
+    
+                </div>
+    
+                <div class="navigation-manual">
+                    <label for="radio1" class="manual-btn"></label>
+                    <label for="radio2" class="manual-btn"></label>
+                    <label for="radio3" class="manual-btn"></label>
+                    <label for="radio4" class="manual-btn"></label>
+                </div>
+    
+            </div>
+    
+            <script type="text/javascript">
+            var counter = 1;
+            setInterval(function(){
+                document.getElementById('radio' + counter).checked = true;
+                counter++;
+                if(counter > 4){
+                    counter=1
+                }
+            }, 5000)
+            </script>
+        </div>
+    
+        
+            
+
+    </section>
+
+</body>
+</html>

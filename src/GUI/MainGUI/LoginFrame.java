@@ -87,7 +87,7 @@ public class LoginFrame extends javax.swing.JFrame {
         txtUser.setFont(new java.awt.Font("Tahoma", 3, 16)); // NOI18N
         txtUser.setForeground(new java.awt.Color(102, 102, 102));
         txtUser.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtUser.setText("TeoNV");
+        txtUser.setText("Username");
         txtUser.setBorder(null);
         txtUser.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {

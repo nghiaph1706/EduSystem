@@ -18,7 +18,7 @@ public class XImage {
     }
     
     public static void saveImageChuyenDe(File src){
-        File dst = new File("src/Hinh/ChuyenDe",src.getName());
+        File dst = new File("Hinh/ChuyenDe/",src.getName());
         if (!dst.getParentFile().exists()) {
             dst.getParentFile().mkdirs();
         }
@@ -32,7 +32,7 @@ public class XImage {
     }
     
     public static void saveImageNhanVien(File src){
-        File dst = new File("src/Hinh/NhanVien", src.getName());
+        File dst = new File("Hinh/NhanVien/", src.getName());
         if (!dst.getParentFile().exists()) {
             dst.getParentFile().mkdirs();
         }
@@ -46,12 +46,12 @@ public class XImage {
     }
     
     public static ImageIcon readImageChuyenDe(String fileName){
-        File path = new File("src/Hinh/ChuyenDe",fileName);
+        File path = new File("Hinh/ChuyenDe",fileName);
         return new ImageIcon(path.getAbsolutePath());
     }
     
     public static ImageIcon readImageNhanVien(String fileName){
-        File path = new File("src/Hinh/NhanVien",fileName);
+        File path = new File("Hinh/NhanVien",fileName);
         return new ImageIcon(path.getAbsolutePath());
     }
 }
